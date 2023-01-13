@@ -1,7 +1,7 @@
+const { Worker } = require("worker_threads");
 const isUrl = require("is-url");
 const request = require("request");
 const whoiser = require("whoiser");
-const moment = require("moment");
 
 exports.inspectLink = async (req, res) => {
   /* -------------------------------------------------------------------------- */
@@ -23,52 +23,28 @@ exports.inspectLink = async (req, res) => {
 
   var url = req.body.inspectURL;
 
-  /* -------------------------------------------------------------------------- */
-  /*                               Processing URL                               */
-  /* -------------------------------------------------------------------------- */
-  url = await processingUrl(url);
+  const worker = new Worker("./app/controllers/inspectionWorker.js", {workerData: {url: url}});
 
-  /* -------------------------------------------------------------------------- */
-  /*                     Check number of days since creation                    */
-  /* -------------------------------------------------------------------------- */
-  obtainDomainAge = await obtainDomainAge(url);
+  worker.once("message", result => {
+    console.log("result" + result);
+  });
 
-  res.status(200).send({
-    message: "success",
+  worker.on("error", error => {
+      console.log(error);
+  });
+
+  worker.on("exit", exitCode => {
+      console.log(`It exited with code ${exitCode}`);
+  })
+
+  res.send({
+    message:"success"
   });
 };
 
-processingUrl = async (url) => {
-  /* ------------------------------ unshorten url ----------------------------- */
-  url = await this.unshortenUrl(url);
-  console.log("🚀 ~ file: controller.js:25 ~ exports.inspectLink= ~ url", url);
-
-  /* ------------------------ decode url encoded links ------------------------ */
-  decodedUrl = this.decodeUrl(url);
-  console.log(
-    "🚀 ~ file: controller.js:29 ~ exports.inspectLink= ~ decodedUrl",
-    decodedUrl
-  );
-
-  return decodedUrl;
-}
-
-obtainDomainAge = async (url) => {
-  /* ------------------------------ obtain domain age using whois ------------------------------ */
-  const urlObj = new URL(url);
-  const urlDomainInfo = await this.whoisLookup(urlObj.hostname);
-  const urlCreatedDate = moment(
-    urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"]
-  );
-
-  if (urlCreatedDate) {
-    const numDaysOfCreation = moment().diff(urlCreatedDate, "days");
-    console.log(
-      "🚀 ~ file: controller.js:38 ~ exports.inspectLink= ~ numDaysOfCreation",
-      numDaysOfCreation
-    );
-  }
-}
+exports.checkIsUrl = (url) => {
+  return isUrl(url);
+};
 
 exports.unshortenUrl = async (url) => {
   const options = {
@@ -92,10 +68,6 @@ exports.unshortenUrl = async (url) => {
 
 exports.decodeUrl = (url) => {
   return decodeURIComponent(url);
-};
-
-exports.checkIsUrl = (url) => {
-  return isUrl(url);
 };
 
 exports.whoisLookup = async (url) => {
