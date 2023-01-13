@@ -4,7 +4,9 @@ const whoiser = require("whoiser");
 const moment = require("moment");
 
 exports.inspectLink = async (req, res) => {
-  /* ---------------------------- Validate request ---------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                              Validate Request                              */
+  /* -------------------------------------------------------------------------- */
   if (!req.body.inspectURL) {
     res.status(400).send({
       message: "Link to be inspected must be provided.",
@@ -24,7 +26,19 @@ exports.inspectLink = async (req, res) => {
   /* -------------------------------------------------------------------------- */
   /*                               Processing URL                               */
   /* -------------------------------------------------------------------------- */
+  url = await processingUrl(url);
 
+  /* -------------------------------------------------------------------------- */
+  /*                     Check number of days since creation                    */
+  /* -------------------------------------------------------------------------- */
+  obtainDomainAge = await obtainDomainAge(url);
+
+  res.status(200).send({
+    message: "success",
+  });
+};
+
+processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
   url = await this.unshortenUrl(url);
   console.log("🚀 ~ file: controller.js:25 ~ exports.inspectLink= ~ url", url);
@@ -36,12 +50,12 @@ exports.inspectLink = async (req, res) => {
     decodedUrl
   );
 
-  /* -------------------------------------------------------------------------- */
-  /*                     Check number of days since creation                    */
-  /* -------------------------------------------------------------------------- */
+  return decodedUrl;
+}
 
-  /* ------------------------------ whois domain ------------------------------ */
-  const urlObj = new URL(decodedUrl);
+obtainDomainAge = async (url) => {
+  /* ------------------------------ obtain domain age using whois ------------------------------ */
+  const urlObj = new URL(url);
   const urlDomainInfo = await this.whoisLookup(urlObj.hostname);
   const urlCreatedDate = moment(
     urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"]
@@ -53,13 +67,8 @@ exports.inspectLink = async (req, res) => {
       "🚀 ~ file: controller.js:38 ~ exports.inspectLink= ~ numDaysOfCreation",
       numDaysOfCreation
     );
-    // TODO: Flag (add to DB?) if numDaysOfCreation < 14.
   }
-
-  res.status(200).send({
-    message: "success",
-  });
-};
+}
 
 exports.unshortenUrl = async (url) => {
   const options = {
