@@ -1,5 +1,5 @@
 const isUrl = require("is-url");
-const { tall } = require('tall');
+const request = require("request");
 
 exports.inspectLink = async (req, res) => {
   // Validate request
@@ -18,36 +18,44 @@ exports.inspectLink = async (req, res) => {
   }
 
   var url = req.body.inspectURL;
-
+  
+  // unshorten url
   url = await this.unshortenUrl(url);
-  console.log("🚀 ~ file: controller.js:24 ~ exports.inspectLink= ~ url", url)
-  decodedUrl = this.decodeUrl(url);
-  console.log("🚀 ~ file: controller.js:25 ~ exports.inspectLink= ~ decodedUrl", decodedUrl)
+  console.log("🚀 ~ file: controller.js:25 ~ exports.inspectLink= ~ url", url)
 
+  // decode url encoded links
+  decodedUrl = this.decodeUrl(url);
+  console.log("🚀 ~ file: controller.js:29 ~ exports.inspectLink= ~ decodedUrl", decodedUrl)
 
   res.status(200).send({
-    message: "success"
+    message: "success",
   });
 };
 
 exports.unshortenUrl = async (url) => {
-  try {
-    const unshortenedUrl = await tall(
-      url
-    )
+  const options = {
+    url: url,
+    followRedirect: false
+  };
 
-    return unshortenedUrl;
-  } catch (err) {
-    console.error(err);
-
-    return url;
-  }
+  // Return new promise
+  return new Promise(function(resolve, reject) {
+    request.get(options, function(err, resp, body) {
+      if (err) {
+        console.log(err); // log the error
+        resolve(url); // return the original url back
+      } else {
+        if (resp.headers.location == null) resolve(url);
+        else resolve(resp.headers.location);
+      }
+    })
+  });
 };
 
 exports.decodeUrl = (url) => {
   return decodeURIComponent(url);
-}
+};
 
 exports.checkIsUrl = (url) => {
   return isUrl(url);
-}
+};

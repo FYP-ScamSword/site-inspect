@@ -4,7 +4,7 @@ it("should unshorten a shortened URL", async () => {
   const unshortenedURL = await controller.unshortenUrl("https://bit.ly/3GCJYqi");
 
   expect(unshortenedURL).toBe(
-    "https://www.google.com/"
+    "https://google.com/"
   );
 });
 
