@@ -21,6 +21,9 @@ exports.inspectLink = async (req, res) => {
 
   url = await this.unshortenUrl(url);
   console.log("🚀 ~ file: controller.js:24 ~ exports.inspectLink= ~ url", url)
+  decodedUrl = this.decodeUrl(url);
+  console.log("🚀 ~ file: controller.js:25 ~ exports.inspectLink= ~ decodedUrl", decodedUrl)
+
 
   res.status(200).send({
     message: "success"
@@ -40,6 +43,10 @@ exports.unshortenUrl = async (url) => {
     return url;
   }
 };
+
+exports.decodeUrl = (url) => {
+  return decodeURIComponent(url);
+}
 
 exports.checkIsUrl = (url) => {
   return isUrl(url);
