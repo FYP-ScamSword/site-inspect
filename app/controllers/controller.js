@@ -1,3 +1,4 @@
+const isUrl = require("is-url");
 const { tall } = require('tall');
 
 exports.inspectLink = async (req, res) => {
@@ -5,6 +6,12 @@ exports.inspectLink = async (req, res) => {
   if (!req.body.inspectURL) {
     res.status(400).send({
       message: "Link to be inspected must be provided.",
+    });
+
+    return;
+  } else if (!this.checkIsUrl(req.body.inspectURL)) {
+    res.status(400).send({
+      message: "Invalid URL",
     });
 
     return;
@@ -33,3 +40,7 @@ exports.unshortenUrl = async (url) => {
     return url;
   }
 };
+
+exports.checkIsUrl = (url) => {
+  return isUrl(url);
+}
