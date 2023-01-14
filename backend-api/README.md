@@ -1,1 +1,1 @@
-Link inpsect
+Link inspect
