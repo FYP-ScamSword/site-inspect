@@ -16,6 +16,6 @@
     "moment": "^2.29.4",
     "node-fetch": "^2.6.8",
     "request": "^2.88.2",
-    "whoiser": "^1.13.2"
+    "whoiser": "^1.14.0"
   }
 }
