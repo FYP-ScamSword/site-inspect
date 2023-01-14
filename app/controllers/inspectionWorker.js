@@ -1,6 +1,12 @@
 const moment = require("moment");
 const { parentPort, workerData } = require("worker_threads");
-const { decodeUrl, unshortenUrl, whoisLookup } = require("./controller");
+const {
+  decodeUrl,
+  unshortenUrl,
+  whoisLookup,
+  googleSafeLookupAPI,
+  googleWebRiskLookupAPI,
+} = require("./controller");
 
 startLinkInspection = async (url) => {
   /* -------------------------------------------------------------------------- */
@@ -12,7 +18,17 @@ startLinkInspection = async (url) => {
   /*                     Check number of days since creation                    */
   /* -------------------------------------------------------------------------- */
   obtainDomainAge = await obtainDomainAge(url);
-}
+
+  /* -------------------------------------------------------------------------- */
+  /*              Check URL using Google's Safe Browsing Lookup API             */
+  /* -------------------------------------------------------------------------- */
+  await googleSafeLookupAPI(url);
+
+  /* -------------------------------------------------------------------------- */
+  /*                Check URL using Google's Web Risk Lookup API                */
+  /* -------------------------------------------------------------------------- */
+  await googleWebRiskLookupAPI(url);
+};
 
 processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
@@ -27,7 +43,7 @@ processingUrl = async (url) => {
   );
 
   return decodedUrl;
-}
+};
 
 obtainDomainAge = async (url) => {
   /* ------------------------------ obtain domain age using whois ------------------------------ */
@@ -44,6 +60,6 @@ obtainDomainAge = async (url) => {
       numDaysOfCreation
     );
   }
-}
+};
 
 startLinkInspection(workerData.url);
