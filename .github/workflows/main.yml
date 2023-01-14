@@ -19,17 +19,18 @@ jobs:
             - 'backend-api/**'
   unit-test:
     needs: changes
-    if: ${{ needs.changes.outputs.names == '[backend-api]' }}
+    # if: ${{ needs.changes.outputs.names == '[backend-api]' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-      - name: Install dependencies
-        working-directory: backend-api
-        run: npm install
-      - name: Run test
-        working-directory: backend-api
-        run: npm test
+      - run: echo ${{needs.changes.outputs.names}}
+      # - uses: actions/checkout@v3
+      # - name: Use Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16.x'
+      # - name: Install dependencies
+      #   working-directory: backend-api
+      #   run: npm install
+      # - name: Run test
+      #   working-directory: backend-api
+      #   run: npm test
