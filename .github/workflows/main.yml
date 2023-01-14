@@ -5,13 +5,25 @@ on: [push]
 jobs:
   unit-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-api
     steps:
       - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend-api-path:
+              - 'backend-api/**'
       - name: Use Node.js
+        if: steps.filter.outputs.backend-api-path == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - name: Install dependencies
+        if: steps.filter.outputs.backend-api-path == 'true'
         run: npm install
       - name: Run test
+        if: steps.filter.outputs.backend-api-path == 'true'
         run: npm test
