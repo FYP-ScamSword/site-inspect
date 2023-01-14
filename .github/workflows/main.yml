@@ -16,7 +16,7 @@ jobs:
       with:
         filters: |
           backend-api:
-            - 'backend-api/**
+            - 'backend-api/**'
   unit-test:
     needs: changes
     if: ${{ needs.changes.outputs.names == '[backend-api]' }}
