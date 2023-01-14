@@ -3,26 +3,30 @@ name: CI
 on: [push]
 
 jobs:
-  unit-test:
+  changes:
+    name: Detect Changes in folder
     runs-on: ubuntu-latest
+    outputs:
+      names: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            backend-api-path:
-              - 'backend-api/**'
-      - name: Use Node.js
-        if: steps.filter.outputs.backend-api-path == 'true'
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-      - name: Install dependencies
-        if: steps.filter.outputs.backend-api-path == 'true'
-        working-directory: backend-api
-        run: npm install
-      - name: Run test
-        if: steps.filter.outputs.backend-api-path == 'true'
-        working-directory: backend-api
-        run: npm test
+    - uses: actions/checkout@v2
+    - name: Detect Changes
+      uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          backend-api:
+            - 'backend-api/**
+  unit-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.names == '[backend-api]' }}
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+    - name: Install dependencies
+      working-directory: backend-api
+      run: npm install
+    - name: Run test
+      working-directory: backend-api
+      run: npm test
