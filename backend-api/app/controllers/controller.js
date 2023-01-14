@@ -1,8 +1,10 @@
-const { Worker } = require("worker_threads");
+const { Worker, parentPort } = require("worker_threads");
 const isUrl = require("is-url");
 const request = require("request");
 const whoiser = require("whoiser");
 const fetch = require("node-fetch");
+const fs = require("fs");
+const moment = require("moment");
 
 exports.inspectLink = async (req, res) => {
   /* -------------------------------------------------------------------------- */
@@ -24,31 +26,50 @@ exports.inspectLink = async (req, res) => {
 
   var url = req.body.inspectURL;
 
+  /* -------------------------------------------------------------------------- */
+  /*                             Create new log file                            */
+  /* -------------------------------------------------------------------------- */
+  const fileName = moment().format("YYYY-MM-DD[_]hh-mm-ss-SSS") + ".txt";
+  fs.closeSync(fs.openSync(fileName, "w"));
+  var logger = fs.createWriteStream(fileName, {
+    flags: "a", // 'a' means appending (old data will be preserved)
+  });
+
+  this.writeLine(
+    logger,
+    `exports.inspectLink= ~ | Starting inspection on ${url}`
+  );
+
+  /* -------------------------------------------------------------------------- */
+  /*                  Create new Worker Thread to inspect link                  */
+  /* -------------------------------------------------------------------------- */
   const worker = new Worker("./app/controllers/inspectionWorker.js", {
     workerData: { url: url },
   });
 
-  worker.once("message", (result) => {
-    console.log("result" + result);
+  worker.on("message", (message) => {
+    this.writeLine(logger, message); // receive message on parent port, write message to log file
   });
 
   worker.on("error", (error) => {
-    console.log(error);
+    this.writeLine(logger, error); 
   });
 
   worker.on("exit", (exitCode) => {
-    console.log(`It exited with code ${exitCode}`);
+    this.writeLine(logger, "Link inspection completed."); 
   });
 
   res.send({
-    message: "success",
+    message: "Link inspection request successful.",
   });
 };
 
+/* ------------------------- Checks if URL is valid ------------------------- */
 exports.checkIsUrl = (url) => {
   return isUrl(url);
 };
 
+/* ------------ Unshorten any shortened URLs, e.g. bit.ly, goo.gl ----------- */
 exports.unshortenUrl = async (url) => {
   const options = {
     url: url,
@@ -69,16 +90,19 @@ exports.unshortenUrl = async (url) => {
   });
 };
 
+/* ------------------------ Decode URL-encoded links ------------------------ */
 exports.decodeUrl = (url) => {
   return decodeURIComponent(url);
 };
 
+/* ------------------------- Whois lookup on domain ------------------------- */
 exports.whoisLookup = async (url) => {
   let domainInfo = await whoiser(url);
 
   return domainInfo;
 };
 
+/* --------------------- Google Safe Browsing Lookup API -------------------- */
 exports.googleSafeLookupAPI = async (url) => {
   var req = {
     client: {
@@ -106,35 +130,51 @@ exports.googleSafeLookupAPI = async (url) => {
   );
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    parentPort.postMessage(
+      "exports.googleSafeLookupAPI= ~ | HTTP error response " + response.status
+    );
   }
 
   const data = await response.json();
-  console.log(
-    "🚀 ~ file: controller.js:111 ~ exports.googleSafeLookupAPI= ~ data",
-    data
+  parentPort.postMessage(
+    "exports.googleSafeLookupAPI= ~ data | " + JSON.stringify(data)
   );
 
   if (Object.keys(data).length == 0)
-    console.log("no output from safe browsing lookup api");
+    // no data returned from safe browsing lookup
+    parentPort.postMessage(
+      "exports.googleSafeLookupAPI= ~ | Google's Safe Browsing Lookup API returned no results."
+    );
 };
 
+/* ----------------------- Google Web Risk Lookup API ----------------------- */
 exports.googleWebRiskLookupAPI = async (url) => {
+  const urlObj = new URL(url);
+  urlObj.search = "";
+
   const response = await fetch(
-    `https://webrisk.googleapis.com/v1/uris:search?threatTypes=SOCIAL_ENGINEERING&threatTypes=MALWARE&uri=${url}&key=` +
+    `https://webrisk.googleapis.com/v1/uris:search?threatTypes=SOCIAL_ENGINEERING&threatTypes=MALWARE&uri=${urlObj.href}&key=` +
       process.env.GOOGLE_API_KEY
   );
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    parentPort.postMessage(
+      "exports.googleSafeLookupAPI= ~ | HTTP error response " + response.status
+    );
   }
 
   const data = await response.json();
-  console.log(
-    "🚀 ~ file: controller.js:132 ~ exports.googleWebRiskLookupAPI= ~ data",
-    data
+  parentPort.postMessage(
+    "exports.googleWebRiskLookupAPI= ~ data | " + JSON.stringify(data)
   );
 
   if (Object.keys(data).length == 0)
-    console.log("no output from web risk lookup api");
+    // no data returned from web risk lookup
+    parentPort.postMessage(
+      "exports.googleWebRiskLookupAPI= ~ | Google's Web Risk Lookup API returned no results."
+    );
 };
+
+/* ------------------- Appends a new line to the log file ------------------- */
+exports.writeLine = (logger, line) =>
+  logger.write(`\n${moment().toISOString()} ${line}`);
