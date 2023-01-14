@@ -13,8 +13,8 @@ jobs:
     - name: Detect Changes
       uses: dorny/paths-filter@v2
       id: filter
-      base: ${{ github.ref }}
       with:
+        base: ${{ github.ref }}
         filters: |
           backend-api:
             - 'backend-api/**'
