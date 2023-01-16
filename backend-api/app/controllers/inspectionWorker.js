@@ -25,11 +25,17 @@ startLinkInspection = async (url) => {
 processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
   const unshortenedUrl = await unshortenUrl(url);
-  parentPort.postMessage("processingUrl= ~ unshortenedUrl | " + unshortenedUrl);
+  parentPort.postMessage([
+    "log",
+    "processingUrl= ~ unshortenedUrl | " + unshortenedUrl,
+  ]);
 
   /* ------------------------ decode url encoded links ------------------------ */
   const decodedUrl = decodeUrl(unshortenedUrl);
-  parentPort.postMessage("processingUrl= ~ decodedUrl | " + decodedUrl);
+  parentPort.postMessage([
+    "log",
+    "processingUrl= ~ decodedUrl | " + decodedUrl,
+  ]);
 
   return decodedUrl;
 };
@@ -49,13 +55,22 @@ obtainDomainAge = async (url) => {
 
   if (urlCreatedDate) {
     const numDaysOfCreation = moment().diff(moment(urlCreatedDate), "days");
-    parentPort.postMessage(
-      "obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation
-    );
+    parentPort.postMessage([
+      "log",
+      "obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation,
+    ]);
+
+    if (numDaysOfCreation < 14) {
+      parentPort.postMessage([
+        "flag",
+        "- Domain is less than 2 weeks old.",
+      ]);
+    }
   } else {
-    parentPort.postMessage(
-      "obtainDomainAge= ~ numDaysOfCreation | Domain not found"
-    );
+    parentPort.postMessage([
+      "log",
+      "obtainDomainAge= ~ numDaysOfCreation | Domain not found",
+    ]);
   }
 };
 
