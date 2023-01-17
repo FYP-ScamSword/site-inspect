@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from bs4 import BeautifulSoup, SoupStrainer
 import httplib2
+import time
+from selenium import webdriver
 
 app = Flask(__name__)
 
@@ -26,9 +28,29 @@ def crawl_web():
 
     return jsonify(soup.prettify()), 200
 
-
 def typosquatting():
     return
+
+@app.route("/screenshot", methods=["GET"])
+def screenshot():
+    args = request.args
+    url = args.get("url")
+    if url is None:
+        return jsonify({"message": "url not provided"}), 400
+
+    options = webdriver.ChromeOptions()
+    options.headless = True
+    driver = webdriver.Chrome(options=options)
+
+
+    driver.get(url)
+
+    S = lambda X: driver.execute_script('return document.body.parentNode.scroll'+X)
+    driver.set_window_size(S('Width'),S('Height')) # May need manual adjustment                                                                                                                
+    driver.save_screenshot('src/ss.png')
+
+    driver.quit()
+    return send_file('ss.png', mimetype='image/gif')
 
 
 if __name__ == '__main__':
