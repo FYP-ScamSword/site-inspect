@@ -11,6 +11,7 @@ const db = require("../models");
 const InspectLink = db.inspected_links;
 
 db.mongoose
+  .set("strictQuery", true)
   .connect(db.url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
