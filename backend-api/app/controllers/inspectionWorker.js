@@ -7,19 +7,50 @@ const {
   googleSafeLookupAPI,
   googleWebRiskLookupAPI,
 } = require("./controller");
+const db = require("../models");
+const InspectLink = db.inspected_links;
 
-startLinkInspection = async (url) => {
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to the database!");
+  })
+  .catch((err) => {
+    console.log("Cannot connect to the database!", err);
+    process.exit();
+  });
+
+startLinkInspection = async (url, inspectLink) => {
+  inspectLink = new InspectLink(inspectLink);
+  await inspectLink.save(); // add new entry to DB with status "processing"
+
   /* ----------------------------- Processing URL ----------------------------- */
   url = await processingUrl(url);
 
+  inspectLink["_doc"].processed_url = url;
+
   /* ------------------- Check number of days since creation ------------------ */
-  obtainDomainAge = await obtainDomainAge(url);
+  inspectLink["_doc"].domain_age = await obtainDomainAge(url);
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
 
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
+
+  inspectLink["_doc"].status = "processed";
+
+  // Updating the record in DB with "processed" status as well as processedUrl, calculated domain age.
+  await InspectLink.findByIdAndUpdate(
+    inspectLink["_doc"]._id,
+    inspectLink["_doc"],
+    { useFindAndModify: false }
+  );
+
+  db.mongoose.disconnect();
 };
 
 processingUrl = async (url) => {
@@ -61,17 +92,18 @@ obtainDomainAge = async (url) => {
     ]);
 
     if (numDaysOfCreation < 14) {
-      parentPort.postMessage([
-        "flag",
-        "- Domain is less than 2 weeks old.",
-      ]);
+      parentPort.postMessage(["flag", "- Domain is less than 2 weeks old."]);
     }
+
+    return numDaysOfCreation;
   } else {
     parentPort.postMessage([
       "log",
       "obtainDomainAge= ~ numDaysOfCreation | Domain not found",
     ]);
+
+    return null;
   }
 };
 
-startLinkInspection(workerData.url);
+startLinkInspection(workerData.url, workerData.inspectLink);

@@ -27,6 +27,17 @@ exports.inspectLink = async (req, res) => {
 
   var url = req.body.inspectURL;
 
+  /* --------------------- Creating an InspectLink object --------------------- */
+  var inspectLink = {
+    processed_url: "",
+    original_url: url,
+    status: "processing", // status as "processing" to indicate that the processing is still ongoing
+    report: "",
+    image: "",
+    domain_age: null,
+    flag_points: 0
+  };
+
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
   /* -------------------------------------------------------------------------- */
@@ -46,7 +57,7 @@ exports.inspectLink = async (req, res) => {
   /*                  Create new Worker Thread to inspect link                  */
   /* -------------------------------------------------------------------------- */
   const worker = new Worker("./app/controllers/inspectionWorker.js", {
-    workerData: { url: url },
+    workerData: { url: url, inspectLink: inspectLink },
   });
 
   worker.on("message", (message) => {
