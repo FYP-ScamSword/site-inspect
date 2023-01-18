@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = require("./app/models");
 
 db.mongoose
-.set("strictQuery", true)
+  .set("strictQuery", true)
   .connect(db.url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

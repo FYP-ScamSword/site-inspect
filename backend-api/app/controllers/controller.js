@@ -6,7 +6,7 @@ const AWS = require("aws-sdk");
 const db = require("../models");
 const { checkIsUrl } = require("./inspectionmethods");
 const InspectLink = db.inspected_links;
-const { ObjectId } = require('mongodb');
+const { ObjectId } = require("mongodb");
 
 var credentials = new AWS.SharedIniFileCredentials({ profile: "default" });
 AWS.config.credentials = credentials;
@@ -63,7 +63,8 @@ exports.inspectLink = (req, res) => {
   });
 
   worker.on("message", (message) => {
-    if (message[0] == "log") { // receive message on parent port, write message to log file
+    if (message[0] == "log") {
+      // receive message on parent port, write message to log file
       writeLine(logger, message[1]);
     } else if (message[0] == "flag") {
       prependLine(fileName, message[1]);
@@ -100,11 +101,14 @@ exports.inspectLink = (req, res) => {
         if (data) {
           console.log("Uploaded in:", data.Location);
           fs.unlinkSync(fileName);
-          InspectLink.findOne({_id : inspectLink._id}, function(error, inspectLink) {
-            if (error) console.log(error);
-            inspectLink.report = data.Location;
-            inspectLink.save();
-        });
+          InspectLink.findOne(
+            { _id: inspectLink._id },
+            function (error, inspectLink) {
+              if (error) console.log(error);
+              inspectLink.report = data.Location;
+              inspectLink.save();
+            }
+          );
         }
       });
     });

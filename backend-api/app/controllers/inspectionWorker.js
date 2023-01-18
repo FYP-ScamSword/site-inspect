@@ -5,7 +5,7 @@ const {
   unshortenUrl,
   whoisLookup,
   googleSafeLookupAPI,
-  googleWebRiskLookupAPI
+  googleWebRiskLookupAPI,
 } = require("./inspectionmethods");
 const db = require("../models");
 const InspectLink = db.inspected_links;
@@ -45,11 +45,9 @@ startLinkInspection = async (url, inspectLink) => {
   inspectLink.status = "processed";
 
   // Updating the record in DB with "processed" status as well as processedUrl, calculated domain age.
-  await InspectLink.findByIdAndUpdate(
-    inspectLink._id,
-    inspectLink,
-    { useFindAndModify: false }
-  );
+  await InspectLink.findByIdAndUpdate(inspectLink._id, inspectLink, {
+    useFindAndModify: false,
+  });
 
   terminatingWorker(inspectLink);
 
@@ -112,10 +110,7 @@ obtainDomainAge = async (url) => {
 
 terminatingWorker = (inspectLink) => {
   inspectLink._id = inspectLink._id.toString();
-  parentPort.postMessage([
-    "termination",
-    inspectLink,
-  ]);
-}
+  parentPort.postMessage(["termination", inspectLink]);
+};
 
 startLinkInspection(workerData.url, workerData.inspectLink);
