@@ -1,4 +1,4 @@
-const controller = require("../controllers/controller");
+const controller = require("../controllers/inspectionmethods");
 
 it("should decode an encoded url", () => {
   expect(

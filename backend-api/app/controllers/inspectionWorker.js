@@ -5,8 +5,8 @@ const {
   unshortenUrl,
   whoisLookup,
   googleSafeLookupAPI,
-  googleWebRiskLookupAPI,
-} = require("./controller");
+  googleWebRiskLookupAPI
+} = require("./inspectionmethods");
 const db = require("../models");
 const InspectLink = db.inspected_links;
 
@@ -25,16 +25,16 @@ db.mongoose
   });
 
 startLinkInspection = async (url, inspectLink) => {
-  inspectLink = new InspectLink(inspectLink);
-  await inspectLink.save(); // add new entry to DB with status "processing"
+  const inspectLinkObj = await new InspectLink(inspectLink).save(); // add new entry to DB with status "processing"
+  inspectLink._id = inspectLinkObj["_id"];
 
   /* ----------------------------- Processing URL ----------------------------- */
   url = await processingUrl(url);
 
-  inspectLink["_doc"].processed_url = url;
+  inspectLink.processed_url = url;
 
   /* ------------------- Check number of days since creation ------------------ */
-  inspectLink["_doc"].domain_age = await obtainDomainAge(url);
+  inspectLink.domain_age = await obtainDomainAge(url);
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
@@ -42,14 +42,16 @@ startLinkInspection = async (url, inspectLink) => {
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
 
-  inspectLink["_doc"].status = "processed";
+  inspectLink.status = "processed";
 
   // Updating the record in DB with "processed" status as well as processedUrl, calculated domain age.
   await InspectLink.findByIdAndUpdate(
-    inspectLink["_doc"]._id,
-    inspectLink["_doc"],
+    inspectLink._id,
+    inspectLink,
     { useFindAndModify: false }
   );
+
+  terminatingWorker(inspectLink);
 
   db.mongoose.disconnect();
 };
@@ -92,8 +94,9 @@ obtainDomainAge = async (url) => {
       "obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation,
     ]);
 
-    if (numDaysOfCreation < 14) {
-      parentPort.postMessage(["flag", "- Domain is less than 2 weeks old."]);
+    // Flag if domain is less than 3 months old
+    if (numDaysOfCreation < 90) {
+      parentPort.postMessage(["flag", "- Domain is less than 3 months old."]);
     }
 
     return numDaysOfCreation;
@@ -106,5 +109,13 @@ obtainDomainAge = async (url) => {
     return null;
   }
 };
+
+terminatingWorker = (inspectLink) => {
+  inspectLink._id = inspectLink._id.toString();
+  parentPort.postMessage([
+    "termination",
+    inspectLink,
+  ]);
+}
 
 startLinkInspection(workerData.url, workerData.inspectLink);
