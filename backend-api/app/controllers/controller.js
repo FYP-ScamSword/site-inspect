@@ -7,7 +7,7 @@ const db = require("../models");
 const { checkIsUrl } = require("./inspectionmethods");
 const InspectLink = db.inspected_links;
 const { ObjectId } = require("mongodb");
-
+ 
 // var credentials = new AWS.SharedIniFileCredentials({ profile: "default" });
 // AWS.config.credentials = credentials;
 const s3 = new AWS.S3();
