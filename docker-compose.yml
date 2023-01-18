@@ -7,8 +7,6 @@ services:
       context: ./backend-api
       dockerfile: Dockerfile
     restart: always
-    volumes:
-      - ~/.aws/credentials:/root/.aws/credentials
     env_file:
       - "./backend-api/.env"
     ports:

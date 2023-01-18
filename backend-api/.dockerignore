@@ -1,0 +1,15 @@
+# flyctl launch added from .gitignore
+**\node_modules
+**\build
+**\npm-debug.log
+**\.nyc
+**\*.env
+**\.DS_Store
+**\package-lock.json
+**\.env*
+**\.flaskenv*
+!**\.env.project
+!**\.env.vault
+**\.env.vault
+**\.gitignore
+fly.toml
