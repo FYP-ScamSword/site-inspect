@@ -36,6 +36,7 @@ jobs:
         run: npm test
   deploy:
     needs: unit-test
+    if: github.ref == 'refs/heads/main'
     name: Deploy app
     runs-on: ubuntu-latest
     env:
