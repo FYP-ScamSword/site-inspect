@@ -1,4 +1,4 @@
-const controller = require("../controllers/controller");
+const controller = require("../controllers/inspectionmethods");
 
 it("should unshorten a shortened URL", async () => {
   const unshortenedURL = await controller.unshortenUrl("https://bit.ly/3GCJYqi");
