@@ -9,7 +9,8 @@ module.exports = (mongoose) => {
         report: String,
         image: String,
         domain_age: Number,
-        flag_points: Number
+        flag_points: Number,
+        registrar_abuse_contact: String
       },
       { timestamps: true }
     )

@@ -34,7 +34,9 @@ startLinkInspection = async (url, inspectLink) => {
   inspectLink.processed_url = url;
 
   /* ------------------- Check number of days since creation ------------------ */
-  inspectLink.domain_age = await obtainDomainAge(url);
+  const whoisUrl = await obtainWhoisInfo(url);
+  inspectLink.domain_age = whoisUrl["domain_age"];
+  inspectLink.registrar_abuse_contact = whoisUrl["registrar_abuse_contact"];
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
@@ -72,7 +74,7 @@ processingUrl = async (url) => {
   return decodedUrl;
 };
 
-obtainDomainAge = async (url) => {
+obtainWhoisInfo = async (url) => {
   /* ------------------------------ obtain domain age using whois ------------------------------ */
   const urlObj = new URL(url);
   const urlHostname = urlObj.hostname.startsWith("www.")
@@ -81,6 +83,23 @@ obtainDomainAge = async (url) => {
 
   const urlDomainInfo = await whoisLookup(urlHostname);
 
+  const whoisUrl = {
+    domain_age: calculateDomainAge(urlDomainInfo),
+    registrar_abuse_contact: obtainRegistrar(urlDomainInfo),
+  };
+
+  return whoisUrl;
+};
+
+obtainRegistrar = (urlDomainInfo) => {
+  const registrarAbuseContact = urlDomainInfo[Object.keys(urlDomainInfo)[0]][
+        "Registrar Abuse Contact Email"
+      ];
+
+  return registrarAbuseContact ? registrarAbuseContact : null;
+};
+
+calculateDomainAge = (urlDomainInfo) => {
   /* ------------------------ Calculate the domain age ------------------------ */
   const urlCreatedDate =
     urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"];
