@@ -106,8 +106,10 @@ exports.inspectLink = (req, res) => {
             { _id: inspectLink._id },
             function (error, inspectLink) {
               if (error) console.log(error);
-              inspectLink.report = data.Location;
-              inspectLink.save();
+              else {
+                inspectLink.report = data.Location;
+                inspectLink.save();
+              }
             }
           );
         }

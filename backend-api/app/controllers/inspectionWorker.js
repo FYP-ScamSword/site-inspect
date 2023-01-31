@@ -59,17 +59,11 @@ startLinkInspection = async (url, inspectLink) => {
 processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
   const unshortenedUrl = await unshortenUrl(url);
-  parentPort.postMessage([
-    "log",
-    "processingUrl= ~ unshortenedUrl | " + unshortenedUrl,
-  ]);
+  logging("processingUrl= ~ unshortenedUrl | " + unshortenedUrl);
 
   /* ------------------------ decode url encoded links ------------------------ */
   const decodedUrl = decodeUrl(unshortenedUrl);
-  parentPort.postMessage([
-    "log",
-    "processingUrl= ~ decodedUrl | " + decodedUrl,
-  ]);
+  logging("processingUrl= ~ decodedUrl | " + decodedUrl);
 
   return decodedUrl;
 };
@@ -92,9 +86,10 @@ obtainWhoisInfo = async (url) => {
 };
 
 obtainRegistrar = (urlDomainInfo) => {
-  const registrarAbuseContact = urlDomainInfo[Object.keys(urlDomainInfo)[0]][
-        "Registrar Abuse Contact Email"
-      ];
+  const registrarAbuseContact =
+    urlDomainInfo[Object.keys(urlDomainInfo)[0]][
+      "Registrar Abuse Contact Email"
+    ];
 
   return registrarAbuseContact ? registrarAbuseContact : null;
 };
@@ -105,26 +100,36 @@ calculateDomainAge = (urlDomainInfo) => {
     urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"];
 
   if (urlCreatedDate) {
-    const numDaysOfCreation = moment().diff(moment(urlCreatedDate), "days");
-    parentPort.postMessage([
-      "log",
-      "obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation,
-    ]);
+    try {
+      const numDaysOfCreation = moment().diff(moment(urlCreatedDate), "days");
+      logging("obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation);
 
-    // Flag if domain is less than 3 months old
-    if (numDaysOfCreation < 90) {
-      parentPort.postMessage(["flag", "- Domain is less than 3 months old."]);
+      // Flag if domain is less than 3 months old
+      if (numDaysOfCreation < 90) {
+        flagging("- Domain is less than 3 months old.");
+      }
+
+      return numDaysOfCreation;
+    } catch (error) {
+      logging(
+        "obtainDomainAge= ~ numDaysOfCreation | An error occured\n" + error
+      );
+
+      return null;
     }
-
-    return numDaysOfCreation;
   } else {
-    parentPort.postMessage([
-      "log",
-      "obtainDomainAge= ~ numDaysOfCreation | Domain not found",
-    ]);
+    logging("obtainDomainAge= ~ numDaysOfCreation | Domain not found");
 
     return null;
   }
+};
+
+logging = (message) => {
+  parentPort.postMessage(["log", message]);
+};
+
+flagging = (message) => {
+  parentPort.postMessage(["flag", message]);
 };
 
 terminatingWorker = (inspectLink) => {
