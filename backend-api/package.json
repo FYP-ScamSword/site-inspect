@@ -17,6 +17,7 @@
     "moment": "^2.29.4",
     "mongoose": "^6.8.3",
     "node-fetch": "^2.6.8",
+    "parse-domains": "^2.0.3",
     "prepend-file": "^2.0.1",
     "request": "^2.88.2",
     "whoiser": "^1.14.0"

@@ -1,5 +1,5 @@
 module.exports = (mongoose) => {
-  const InspectLink = mongoose.model(
+  const InspectedLink = mongoose.model(
     "inspected_links",
     mongoose.Schema(
       {
@@ -16,5 +16,5 @@ module.exports = (mongoose) => {
     )
   );
 
-  return InspectLink;
+  return InspectedLink;
 };
