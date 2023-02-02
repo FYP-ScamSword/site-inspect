@@ -11,6 +11,10 @@ const db = require("../models");
 const InspectLinks = db.inspected_links;
 const KnownSites = db.cybersquat_known_sites;
 const parse = require("parse-domains");
+const {
+  jaroWinklerDistance,
+  levenshteinDistance,
+} = require("./stringSimilarity");
 
 db.mongoose
   .set("strictQuery", true)
@@ -130,38 +134,94 @@ calculateDomainAge = (urlDomainInfo) => {
   }
 };
 
-/* -------------------------- Cybersquatting Checks ------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                            Cybersquatting Checks                           */
+/* -------------------------------------------------------------------------- */
 checkCybersquatting = async (url) => {
   let parsedDomain = await parse(url);
 
+  const checkStrings = parsedDomain.subdomain
+    .split("-")
+    .concat(parsedDomain.siteName)
+    .filter((str) => str !== "");
+
   /* --------------- Check For Levelsquatting or Combosquatting --------------- */
-  const levelComboSqFound = await checkLevelsquattingCombosquatting(
-    parsedDomain
-  );
+  const levelCombosquattingDetected = await checkLevelsquattingCombosquatting(checkStrings);
+  if (levelCombosquattingDetected) return;
 
-  logging(`checkCybersquatting= ~levelComboSqFound | ${levelComboSqFound}`);
-
-  if (levelComboSqFound[1]) {
-    flagging(
-      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of a trademark {${levelComboSqFound[0]}} found in ${url}`
-    );
-  }
+  /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
+  const typoBitsquattingDetected = await checkTyposquattingBitsquatting(checkStrings);
+  if (typoBitsquattingDetected) return;
 };
 
-checkLevelsquattingCombosquatting = async (parsedDomain) => {
-  const checkStrings = parsedDomain.subdomain
-  .split("-")
-  .concat(parsedDomain.siteName).filter((str) => str !== '');;
-
-  console.log(checkStrings);
-
+/* --- Levelquatting or Combosquatting - detect direct usage of trademark --- */
+checkLevelsquattingCombosquatting = async (checkStrings) => {
   for (let i = 0; i < checkStrings.length; i++) {
-    const trademark = await KnownSites.findOne({"keyword": { $regex: '.*' + checkStrings[i] + '.*' }});
-    if (trademark) return [trademark.keyword, true];
+    const trademark = await KnownSites.findOne({
+      keyword: { $regex: ".*" + checkStrings[i] + ".*", $options: "i" },
+    });
+
+    if (trademark) {
+      logging(
+        `checkLevelsquattingCombosquatting= ~trademark | ${trademark.keyword}`
+      );
+      flagging(
+        `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of a trademark {${trademark.keyword}} found`
+      );
+
+      return true;
+    }
   }
 
-  return [null, false];
-}
+  return false;
+};
+
+/* --- Typosquatting or Bitsquatting - detect indirect usage of trademark --- */
+checkTyposquattingBitsquatting = async (checkStrings) => {
+  var keywords = await KnownSites.find({});
+  keywords = keywords.map((record) => record.keyword);
+
+  var flags = "";
+
+  for (let i = 0; i < checkStrings.length; i++) {
+    for (let j = 0; j < keywords.length; j++) {
+      var jaroWinklerSimilarity = jaroWinklerDistance(
+        checkStrings[i],
+        keywords[j]
+      );
+      logging(
+        `checkTyposquattingBitsquatting= ~jaroWinklerSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${jaroWinklerSimilarity}`
+      );
+
+      if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
+        if (flags.length != 0) flags += "\n";
+        flags += `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${jaroWinklerSimilarity}`
+      }
+
+      if (jaroWinklerSimilarity > 0.6) {
+        var levenshteinDistSimilarity = levenshteinDistance(
+          checkStrings[i],
+          keywords[j]
+        );
+        logging(
+          `checkTyposquattingBitsquatting= ~levenshteinDistSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${levenshteinDistSimilarity}`
+        );
+
+        if (levenshteinDistSimilarity / checkStrings[i].length <= 1/3) {
+          if (flags.length != 0) flags += "\n";
+          flags += `- Typosquatting/Bitsquatting Detected with Levenshtein Distance\n\t- Distance of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${levenshteinDistSimilarity}`;
+        }
+      }
+    }
+  }
+
+  if (flags.length != 0) {
+    flagging(flags);
+    return true;
+  }
+
+  return false;
+};
 
 logging = (message) => {
   parentPort.postMessage(["log", message]);
