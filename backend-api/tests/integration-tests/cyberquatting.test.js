@@ -21,7 +21,7 @@ var knownSites = [
     url: "https://www.amazon.sg",
     organization: "Amazon.com, Inc.",
     keyword: "amazon",
-  },
+  }
 ];
 
 describe("Link Inspection Cybersquatting", () => {
