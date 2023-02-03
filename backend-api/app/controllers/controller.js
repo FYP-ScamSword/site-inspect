@@ -4,7 +4,7 @@ const moment = require("moment");
 const prependFile = require("prepend-file");
 const AWS = require("aws-sdk");
 const db = require("../models");
-const { checkIsUrl } = require("./inspectionmethods");
+const { checkIsUrl } = require("./inspection.controller");
 const InspectLinks = db.inspected_links;
 const { ObjectId } = require("mongodb");
 

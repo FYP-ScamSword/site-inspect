@@ -6,7 +6,7 @@ const {
   whoisLookup,
   googleSafeLookupAPI,
   googleWebRiskLookupAPI,
-} = require("./inspectionmethods");
+} = require("./inspection.controller");
 const db = require("../models");
 const InspectLinks = db.inspected_links;
 const KnownSites = db.cybersquat_known_sites;
@@ -157,14 +157,29 @@ checkCybersquatting = async (url) => {
     trademarks,
     parsedDomain.hostname
   );
-  if (levelCombosquattingDetected) return;
+  if (levelCombosquattingDetected[0]) {
+    logging(`checkLevelsquattingCombosquatting= ~trademark |${levelCombosquattingDetected[1]}`);
+
+    flagging(
+      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${levelCombosquattingDetected[1]} } found`
+    );
+
+    return;
+  }
 
   /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
   const typoBitsquattingDetected = await checkTyposquattingBitsquatting(
     trademarks,
     checkStrings
   );
-  if (typoBitsquattingDetected) return;
+  
+  logging(typoBitsquattingDetected[1]);
+
+  if (typoBitsquattingDetected[0]) {
+    flagging(typoBitsquattingDetected[2]);
+
+    return;
+  }
 };
 
 terminatingWorker = (inspectedLink) => {

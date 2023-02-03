@@ -5,7 +5,7 @@ const {
 } = require("./stringSimilarity");
 
 /* --- Levelquatting or Combosquatting - detect direct usage of trademark --- */
-exports.checkLevelsquattingCombosquatting = async (trademarks, parsedHostname) => {
+exports.checkLevelsquattingCombosquatting = (trademarks, parsedHostname) => {
   // remove any "-" or "." to account for cases like dh-s.bank, or db.s.bank
   parsedHostname = parsedHostname.replace(/\-/g, "").replace(/\./g, "");
 
@@ -17,23 +17,18 @@ exports.checkLevelsquattingCombosquatting = async (trademarks, parsedHostname) =
   }
 
   if (flags != "") {
-    logging(`checkLevelsquattingCombosquatting= ~trademark |${flags}`);
-
-    flagging(
-      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${flags} } found`
-    );
-
-    return true;
+    return [true, flags];
   }
 
-  return false;
+  return [false, null];
 };
 
 /* --- Typosquatting or Bitsquatting - detect indirect usage of trademark --- */
-exports.checkTyposquattingBitsquatting = async (keywords, checkStrings) => {
+exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
   keywords = keywords.map((record) => record.keyword);
 
   var flags = "";
+  var logs = "";
 
   for (let i = 0; i < checkStrings.length; i++) {
     for (let j = 0; j < keywords.length; j++) {
@@ -41,9 +36,9 @@ exports.checkTyposquattingBitsquatting = async (keywords, checkStrings) => {
         checkStrings[i],
         keywords[j]
       );
-      logging(
-        `checkTyposquattingBitsquatting= ~jaroWinklerSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${jaroWinklerSimilarity}`
-      );
+
+      logs != "" ? logs += "\n" : null;
+      logs += `checkTyposquattingBitsquatting= ~jaroWinklerSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${jaroWinklerSimilarity}`
 
       if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
         if (flags.length != 0) flags += "\n";
@@ -55,9 +50,8 @@ exports.checkTyposquattingBitsquatting = async (keywords, checkStrings) => {
           checkStrings[i],
           keywords[j]
         );
-        logging(
-          `checkTyposquattingBitsquatting= ~levenshteinDistSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${levenshteinDistSimilarity}`
-        );
+
+        logs += `\ncheckTyposquattingBitsquatting= ~levenshteinDistSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${levenshteinDistSimilarity}`
 
         if (levenshteinDistSimilarity / checkStrings[i].length <= 1 / 3) {
           if (flags.length != 0) flags += "\n";
@@ -68,9 +62,8 @@ exports.checkTyposquattingBitsquatting = async (keywords, checkStrings) => {
   }
 
   if (flags.length != 0) {
-    flagging(flags);
-    return true;
+    return [true, logs, flags];
   }
 
-  return false;
+  return [false, logs, null];
 };
