@@ -140,6 +140,9 @@ calculateDomainAge = (urlDomainInfo) => {
 checkCybersquatting = async (url) => {
   let parsedDomain = await parse(url);
 
+  // checkStrings will comprise of the subdomain and the site name:
+  // e.g. internet-banking.dhs.com.sg
+  // checkStrings = [internet, banking, dhs]
   const checkStrings = parsedDomain.subdomain
     .split("-")
     .concat(parsedDomain.siteName)
@@ -149,7 +152,7 @@ checkCybersquatting = async (url) => {
 
   /* --------------- Check For Levelsquatting or Combosquatting --------------- */
   const levelCombosquattingDetected = await checkLevelsquattingCombosquatting(
-    checkStrings
+    parsedDomain.hostname
   );
   if (levelCombosquattingDetected) return;
 
@@ -192,15 +195,16 @@ checkCybersquatting = async (url) => {
 // };
 
 /* --- Levelquatting or Combosquatting - detect direct usage of trademark --- */
-checkLevelsquattingCombosquatting = async (checkStrings) => {
+checkLevelsquattingCombosquatting = async (parsedHostname) => {
   const trademarks = await KnownSites.find({});
 
+  // remove any "-" or "." to account for cases like dh-s.bank, or db.s.bank
+  parsedHostname = parsedHostname.replace(/\-/g, "").replace(/\./g, "");
+
   var flags = "";
-  for (let i = 0; i < checkStrings.length; i++) {
-    for (let j = 0; j < trademarks.length; j++) {
-      if (checkStrings[i].includes(trademarks[j].keyword)) {
-        flags += ` ${trademarks[j].keyword}`;
-      }
+  for (let i = 0; i < trademarks.length; i++) {
+    if (parsedHostname.includes(trademarks[i].keyword)) {
+      flags += ` ${trademarks[i].keyword}`;
     }
   }
 
