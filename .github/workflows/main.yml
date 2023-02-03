@@ -34,8 +34,16 @@ jobs:
       - name: Run test
         working-directory: backend-api
         run: npm run test:unit
-  deploy:
+  integration-test:
     needs: unit-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run integration test
+        working-directory: backend-api
+        run: docker-compose -f ci/docker-compose.test.yml up --exit-code-from link-inspection-backend-jest
+  deploy:
+    needs: integration-test
     if: github.ref == 'refs/heads/main'
     name: Deploy app
     runs-on: ubuntu-latest
