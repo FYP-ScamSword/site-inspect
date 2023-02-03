@@ -1,4 +1,4 @@
-const controller = require("../controllers/inspectionmethods");
+const controller = require("../../app/controllers/inspection.controller");
 
 it("should check if a url is valid", async () => {
   expect(controller.checkIsUrl("google")).toBe(false);

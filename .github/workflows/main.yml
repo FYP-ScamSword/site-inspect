@@ -33,7 +33,7 @@ jobs:
         run: npm install
       - name: Run test
         working-directory: backend-api
-        run: npm test
+        run: npm run test:unit
   deploy:
     needs: unit-test
     if: github.ref == 'refs/heads/main'

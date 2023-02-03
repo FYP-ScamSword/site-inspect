@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest"
+    "test:unit": "jest --testPathPattern=/tests/unit-tests",
+    "test:integration": "jest --testPathPattern=/tests/integration-tests"
   },
   "author": "",
   "license": "ISC",
