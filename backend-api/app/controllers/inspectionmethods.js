@@ -3,6 +3,7 @@ const request = require("request");
 const whoiser = require("whoiser");
 const fetch = require("node-fetch");
 const { parentPort } = require("worker_threads");
+const parse = require("parse-domains");
 
 /* ------------------------- Checks if URL is valid ------------------------- */
 exports.checkIsUrl = (url) => {
@@ -37,7 +38,8 @@ exports.decodeUrl = (url) => {
 
 /* ------------------------- Whois lookup on domain ------------------------- */
 exports.whoisLookup = async (url) => {
-  let domainInfo = await whoiser(url);
+  let parsedDomain = await parse(url);
+  let domainInfo = await whoiser(parsedDomain.domain);
 
   return domainInfo;
 };

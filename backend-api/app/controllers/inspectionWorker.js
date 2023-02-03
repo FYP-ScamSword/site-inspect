@@ -145,32 +145,73 @@ checkCybersquatting = async (url) => {
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 
+  logging(`checkCybersquatting= ~checkStrings | ${checkStrings}`);
+
   /* --------------- Check For Levelsquatting or Combosquatting --------------- */
-  const levelCombosquattingDetected = await checkLevelsquattingCombosquatting(checkStrings);
+  const levelCombosquattingDetected = await checkLevelsquattingCombosquatting(
+    checkStrings
+  );
   if (levelCombosquattingDetected) return;
 
   /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
-  const typoBitsquattingDetected = await checkTyposquattingBitsquatting(checkStrings);
+  const typoBitsquattingDetected = await checkTyposquattingBitsquatting(
+    checkStrings
+  );
   if (typoBitsquattingDetected) return;
 };
 
+// /* --- Levelquatting or Combosquatting - detect direct usage of trademark --- */
+// checkLevelsquattingCombosquatting = async (checkStrings) => {
+//   console.log(checkStrings);
+//   const regex = checkStrings.map(function (k) {
+//     return new RegExp(k);
+//   });
+
+//   const trademarks = await KnownSites.find({
+//     keyword: { $in: regex },
+//   });
+
+//   if (trademarks) {
+//     var flags = trademarks[0].keyword;
+//     for (let i = 1; i < trademarks.length; i++) {
+//       flags += `, ${trademarks[i].keyword}`;
+//     }
+
+//     logging(
+//       `checkLevelsquattingCombosquatting= ~trademark | ${flags}`
+//     );
+
+//     flagging(
+//       `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${flags}} found`
+//     );
+
+//     return true;
+//   }
+
+//   return false;
+// };
+
 /* --- Levelquatting or Combosquatting - detect direct usage of trademark --- */
 checkLevelsquattingCombosquatting = async (checkStrings) => {
+  const trademarks = await KnownSites.find({});
+
+  var flags = "";
   for (let i = 0; i < checkStrings.length; i++) {
-    const trademark = await KnownSites.findOne({
-      keyword: { $regex: ".*" + checkStrings[i] + ".*", $options: "i" },
-    });
-
-    if (trademark) {
-      logging(
-        `checkLevelsquattingCombosquatting= ~trademark | ${trademark.keyword}`
-      );
-      flagging(
-        `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of a trademark {${trademark.keyword}} found`
-      );
-
-      return true;
+    for (let j = 0; j < trademarks.length; j++) {
+      if (checkStrings[i].includes(trademarks[j].keyword)) {
+        flags += ` ${trademarks[j].keyword}`;
+      }
     }
+  }
+
+  if (flags != "") {
+    logging(`checkLevelsquattingCombosquatting= ~trademark |${flags}`);
+
+    flagging(
+      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${flags} } found`
+    );
+
+    return true;
   }
 
   return false;
@@ -195,7 +236,7 @@ checkTyposquattingBitsquatting = async (checkStrings) => {
 
       if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
         if (flags.length != 0) flags += "\n";
-        flags += `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${jaroWinklerSimilarity}`
+        flags += `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${jaroWinklerSimilarity}`;
       }
 
       if (jaroWinklerSimilarity > 0.6) {
@@ -207,7 +248,7 @@ checkTyposquattingBitsquatting = async (checkStrings) => {
           `checkTyposquattingBitsquatting= ~levenshteinDistSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${levenshteinDistSimilarity}`
         );
 
-        if (levenshteinDistSimilarity / checkStrings[i].length <= 1/3) {
+        if (levenshteinDistSimilarity / checkStrings[i].length <= 1 / 3) {
           if (flags.length != 0) flags += "\n";
           flags += `- Typosquatting/Bitsquatting Detected with Levenshtein Distance\n\t- Distance of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${levenshteinDistSimilarity}`;
         }
