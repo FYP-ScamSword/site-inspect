@@ -1,5 +1,5 @@
 module.exports = (mongoose) => {
-  const InspectLink = mongoose.model(
+  const InspectedLink = mongoose.model(
     "inspected_links",
     mongoose.Schema(
       {
@@ -9,11 +9,13 @@ module.exports = (mongoose) => {
         report: String,
         image: String,
         domain_age: Number,
-        flag_points: Number
+        flag_points: Number,
+        registrar_abuse_contact: String,
+        toFlag: Boolean
       },
       { timestamps: true }
     )
   );
 
-  return InspectLink;
+  return InspectedLink;
 };
