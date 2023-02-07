@@ -22,9 +22,7 @@ exports.checkLevelsquattingCombosquatting = async (
   parsedHostname
 ) => {
   // remove any "-" or "." to account for cases like dh-s.bank, or db.s.bank
-  let processedparsedHostname = parsedHostname
-    .replace(/\-/g, "")
-    .replace(/\./g, "");
+  let processedparsedHostname = parsedHostname.replace(/[\-\.]/g, "");
 
   var flags = "";
   for (let i = 0; i < trademarks.length; i++) {
