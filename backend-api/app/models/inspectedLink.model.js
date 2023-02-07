@@ -10,7 +10,8 @@ module.exports = (mongoose) => {
         image: String,
         domain_age: Number,
         flag_points: Number,
-        registrar_abuse_contact: String
+        registrar_abuse_contact: String,
+        toFlag: Boolean
       },
       { timestamps: true }
     )

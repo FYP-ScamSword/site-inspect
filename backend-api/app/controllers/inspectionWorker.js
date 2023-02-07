@@ -53,7 +53,9 @@ startLinkInspection = async (url, inspectedLink) => {
   await googleWebRiskLookupAPI(url);
 
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
-  await checkCybersquatting(url);
+  let cyberSquattingDetected = await checkCybersquatting(url);
+
+  if (!cyberSquattingDetected) inspectedLink.toFlag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
 
   inspectedLink.status = "processed";
 
@@ -112,7 +114,10 @@ calculateDomainAge = (urlDomainInfo) => {
 
   if (urlCreatedDate) {
     try {
-      const numDaysOfCreation = moment().diff(moment(urlCreatedDate), "days");
+      const numDaysOfCreation = moment().diff(
+        moment(new Date(urlCreatedDate).toISOString()),
+        "days"
+      );
       logging("obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation);
 
       // Flag if domain is less than 3 months old
@@ -157,28 +162,38 @@ checkCybersquatting = async (url) => {
     trademarks,
     parsedDomain.hostname
   );
+
   if (levelCombosquattingDetected[0]) {
-    logging(`checkLevelsquattingCombosquatting= ~trademark |${levelCombosquattingDetected[1]}`);
+    logging(
+      `checkLevelsquattingCombosquatting= ~trademark |${levelCombosquattingDetected[1]}`
+    );
 
     flagging(
       `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${levelCombosquattingDetected[1]} } found`
     );
 
-    return;
+    return true;
+  } else {
+    if (levelCombosquattingDetected[1] == "legit") {
+      logging(
+        `checkLevelsquattingCombosquatting= ~This is a legitimate domain.`
+      );
+      return false;
+    }
   }
 
   /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
-  const typoBitsquattingDetected = await checkTyposquattingBitsquatting(
+  const typoBitsquattingDetected = checkTyposquattingBitsquatting(
     trademarks,
     checkStrings
   );
-  
+
   logging(typoBitsquattingDetected[1]);
 
   if (typoBitsquattingDetected[0]) {
     flagging(typoBitsquattingDetected[2]);
 
-    return;
+    return true;
   }
 };
 

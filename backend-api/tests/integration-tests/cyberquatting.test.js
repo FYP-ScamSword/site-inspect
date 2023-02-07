@@ -47,20 +47,20 @@ describe("Link Inspection Cybersquatting", () => {
   });
 
   it("Should detect levelsquatting or combosquatting", () => {
-    db.cybersquat_known_sites.find({}).then((records) => {
+    db.cybersquat_known_sites.find({}).then(async (records) => {
       // positive records
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "bankd.bs.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "db.sbank.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "db-sbank.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "db-s.bank.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "dbsbank.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "dbs.bank.com")).toStrictEqual([true, " dbs"]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "amazon.dbs.com")).toStrictEqual([true, " dbs amazon"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "bankd.bs.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db.sbank.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-sbank.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-s.bank.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbsbank.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbs.bank.com")).toStrictEqual([true, " dbs"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazon.dbs.com")).toStrictEqual([true, " dbs amazon"]);
 
       // negative records
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "dhs.bank.com")).toStrictEqual([false, null]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "amazn.ds.com")).toStrictEqual([false, null]);
-      expect(cybersquatController.checkLevelsquattingCombosquatting(records, "amazodbns.com")).toStrictEqual([false, null]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dhs.bank.com")).toStrictEqual([false, null]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazn.ds.com")).toStrictEqual([false, null]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazodbns.com")).toStrictEqual([false, null]);
     });
   });
 
