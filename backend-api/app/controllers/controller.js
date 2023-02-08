@@ -42,7 +42,7 @@ exports.inspectLink = (req, res) => {
     domain_age: null,
     flag_points: 0,
     registrar_abuse_contact: "",
-    toFlag: null
+    toFlag: null,
   };
 
   /* -------------------------------------------------------------------------- */
@@ -94,13 +94,13 @@ exports.inspectLink = (req, res) => {
           Body: fs.createReadStream(fileName),
           Key: fileName,
         };
-  
+
         s3.upload(params, function (err, data) {
           //handle error
           if (err) {
             console.log("Error", err);
           }
-  
+
           //success
           if (data) {
             console.log(inspectedLink._id);

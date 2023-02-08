@@ -15,7 +15,14 @@ const {
   checkTyposquattingBitsquatting,
   checkLevelsquattingCombosquatting,
 } = require("./cybersquat.controller");
-const { logging, flagging } = require("./logging.controller");
+const {
+  cybersquattingCheckStringsLog,
+  obtainDomainAgeErrorLog,
+  obtainDomainAgeLog,
+  domainAgeFlag,
+  processingUrlUnshortenLog,
+  processingUrlDecodeLog,
+} = require("./logging.controller");
 
 db.mongoose
   .set("strictQuery", true)
@@ -72,11 +79,11 @@ startLinkInspection = async (url, inspectedLink) => {
 processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
   const unshortenedUrl = await unshortenUrl(url);
-  logging("processingUrl= ~ unshortenedUrl | " + unshortenedUrl);
+  processingUrlUnshortenLog(processingUrl.name, unshortenedUrl);
 
   /* ------------------------ decode url encoded links ------------------------ */
   const decodedUrl = decodeUrl(unshortenedUrl);
-  logging("processingUrl= ~ decodedUrl | " + decodedUrl);
+  processingUrlDecodeLog(processingUrl.name, decodedUrl);
 
   return decodedUrl;
 };
@@ -118,23 +125,22 @@ calculateDomainAge = (urlDomainInfo) => {
         moment(new Date(urlCreatedDate).toISOString()),
         "days"
       );
-      logging("obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation);
+
+      obtainDomainAgeLog(calculateDomainAge.name, numDaysOfCreation);
 
       // Flag if domain is less than 3 months old
       if (numDaysOfCreation < 90) {
-        flagging("- Domain is less than 3 months old.");
+        domainAgeFlag();
       }
 
       return numDaysOfCreation;
     } catch (error) {
-      logging(
-        "obtainDomainAge= ~ numDaysOfCreation | An error occured\n" + error
-      );
+      obtainDomainAgeErrorLog(calculateDomainAge.name, error);
 
       return null;
     }
   } else {
-    logging("obtainDomainAge= ~ numDaysOfCreation | Domain not found");
+    obtainDomainAgeLog(calculateDomainAge.name, "Domain not found");
 
     return null;
   }
@@ -154,7 +160,7 @@ checkCybersquatting = async (url) => {
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 
-  logging(`checkCybersquatting= ~checkStrings | ${checkStrings}`);
+  cybersquattingCheckStringsLog(checkCybersquatting.name, checkStrings);
 
   /* --------------- Check For Levelsquatting or Combosquatting --------------- */
   const trademarks = await KnownSites.find({});
@@ -163,24 +169,8 @@ checkCybersquatting = async (url) => {
     parsedDomain.hostname
   );
 
-  if (levelCombosquattingDetected[0]) {
-    logging(
-      `checkLevelsquattingCombosquatting= ~trademark |${levelCombosquattingDetected[1]}`
-    );
-
-    flagging(
-      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${levelCombosquattingDetected[1]} } found`
-    );
-
-    return true;
-  } else {
-    if (levelCombosquattingDetected[1] == "legit") {
-      logging(
-        `checkLevelsquattingCombosquatting= ~This is a legitimate domain.`
-      );
-      return false;
-    }
-  }
+  if (levelCombosquattingDetected) return true;
+  else if (levelCombosquattingDetected == null) return false; //is a legitimate domain, stop the checks
 
   /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
   const typoBitsquattingDetected = checkTyposquattingBitsquatting(
@@ -188,13 +178,7 @@ checkCybersquatting = async (url) => {
     checkStrings
   );
 
-  logging(typoBitsquattingDetected[1]);
-
-  if (typoBitsquattingDetected[0]) {
-    flagging(typoBitsquattingDetected[2]);
-
-    return true;
-  }
+  if (typoBitsquattingDetected) return true;
 };
 
 terminatingWorker = (inspectedLink) => {

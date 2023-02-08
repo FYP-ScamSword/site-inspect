@@ -1,5 +1,14 @@
 const parse = require("parse-domains");
 const {
+  typosquattingBitsquattingLevenshteinDistLog,
+  typosquattingBitsquattingJaroWinklerLog,
+  levelsquattingCombosquattingFlag,
+  levelsquattingCombosquattingLog,
+  levelsquattingCombosquattingLegitimateLog,
+  typosquattingBitsquattingJaroWinklerFlag,
+  typosquattingBitsquattingLevenshteinDistFlag,
+} = require("./logging.controller");
+const {
   jaroWinklerDistance,
   levenshteinDistance,
 } = require("./stringSimilarity");
@@ -28,24 +37,27 @@ exports.checkLevelsquattingCombosquatting = async (
   for (let i = 0; i < trademarks.length; i++) {
     if (processedparsedHostname.includes(trademarks[i].keyword)) {
       flags += ` ${trademarks[i].keyword}`;
-      if (await this.checkLegitimateDomain(trademarks[i].url, parsedHostname))
-        return [false, "legit"];
+      if (await this.checkLegitimateDomain(trademarks[i].url, parsedHostname)) {
+        levelsquattingCombosquattingLegitimateLog();
+        return null;
+      }
     }
   }
 
   if (flags != "") {
-    return [true, flags];
+    levelsquattingCombosquattingFlag(flags);
+    levelsquattingCombosquattingLog(flags);
+    return true;
   }
 
-  return [false, null];
+  return false;
 };
 
 /* --- Typosquatting or Bitsquatting - detect indirect usage of trademark --- */
 exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
   keywords = keywords.map((record) => record.keyword);
 
-  var flags = "";
-  var logs = "";
+  var flagged = false;
 
   for (let i = 0; i < checkStrings.length; i++) {
     for (let j = 0; j < keywords.length; j++) {
@@ -54,12 +66,19 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
         keywords[j]
       );
 
-      logs != "" ? (logs += "\n") : null;
-      logs += `checkTyposquattingBitsquatting= ~jaroWinklerSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${jaroWinklerSimilarity}`;
+      typosquattingBitsquattingJaroWinklerLog([
+        checkStrings[i],
+        keywords[j],
+        jaroWinklerSimilarity,
+      ]);
 
       if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
-        if (flags.length != 0) flags += "\n";
-        flags += `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${jaroWinklerSimilarity}`;
+        flagged = true;
+        typosquattingBitsquattingJaroWinklerFlag([
+          checkStrings[i],
+          keywords[j],
+          jaroWinklerSimilarity,
+        ]);
       }
 
       if (jaroWinklerSimilarity > 0.6) {
@@ -68,19 +87,22 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
           keywords[j]
         );
 
-        logs += `\ncheckTyposquattingBitsquatting= ~levenshteinDistSimilarity | Comparing ${checkStrings[i]} with ${keywords[j]}: ${levenshteinDistSimilarity}`;
+        typosquattingBitsquattingLevenshteinDistLog([
+          checkStrings[i],
+          keywords[j],
+          levenshteinDistSimilarity,
+        ]);
 
         if (levenshteinDistSimilarity / checkStrings[i].length <= 1 / 3) {
-          if (flags.length != 0) flags += "\n";
-          flags += `- Typosquatting/Bitsquatting Detected with Levenshtein Distance\n\t- Distance of {${checkStrings[i]}} with trademark {${keywords[j]}} is ${levenshteinDistSimilarity}`;
+          typosquattingBitsquattingLevenshteinDistFlag([
+            checkStrings[i],
+            keywords[j],
+            levenshteinDistSimilarity,
+          ]);
         }
       }
     }
   }
 
-  if (flags.length != 0) {
-    return [true, logs, flags];
-  }
-
-  return [false, logs, null];
+  return flagged;
 };

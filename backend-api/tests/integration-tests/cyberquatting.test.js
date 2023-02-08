@@ -49,32 +49,32 @@ describe("Link Inspection Cybersquatting", () => {
   it("Should detect levelsquatting or combosquatting", () => {
     db.cybersquat_known_sites.find({}).then(async (records) => {
       // positive records
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "bankd.bs.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db.sbank.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-sbank.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-s.bank.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbsbank.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbs.bank.com")).toStrictEqual([true, " dbs"]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazon.dbs.com")).toStrictEqual([true, " dbs amazon"]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "bankd.bs.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db.sbank.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-sbank.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "db-s.bank.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbsbank.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dbs.bank.com")).toStrictEqual(true);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazon.dbs.com")).toStrictEqual(true);
 
       // negative records
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dhs.bank.com")).toStrictEqual([false, null]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazn.ds.com")).toStrictEqual([false, null]);
-      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazodbns.com")).toStrictEqual([false, null]);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "dhs.bank.com")).toStrictEqual(false);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazn.ds.com")).toStrictEqual(false);
+      expect(await cybersquatController.checkLevelsquattingCombosquatting(records, "amazodbns.com")).toStrictEqual(false);
     });
   });
 
   it("Should detect typosquatting or bitsquatting", () => {
     db.cybersquat_known_sites.find({}).then((records) => {
       // positive records
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["internet", "banking", "dhs"])[0]).toBe(true);
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n", "dhs"])[0]).toBe(true);
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n", "internet"])[0]).toBe(true);
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n"])[0]).toBe(true);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["internet", "banking", "dhs"])).toBe(true);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n", "dhs"])).toBe(true);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n", "internet"])).toBe(true);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["amaz0n"])).toBe(true);
 
       // negative records
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["internet", "banking", "dhh"])[0]).toBe(false);
-      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["4m4z0n"])[0]).toBe(false);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["internet", "banking", "dhh"])).toBe(false);
+      expect(cybersquatController.checkTyposquattingBitsquatting(records, ["4m4z0n"])).toBe(false);
     });
   });
 });
