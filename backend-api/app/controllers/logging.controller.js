@@ -66,6 +66,16 @@ exports.obtainDomainAgeErrorLog = (methodName, error) => {
   );
 };
 
+exports.calculateRegistrationPeriodLog = (methodName, value) => {
+  logging(formatMessage(methodName, "registrationPeriod", value));
+};
+
+exports.calculateRegistrationPeriodErrorLog = (methodName, error) => {
+  logging(
+    formatMessage(methodName, "registrationPeriod", "An error occured\n" + error)
+  );
+};
+
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
   logging(formatMessage(methodName, "checkStrings", value));
 };
@@ -128,6 +138,10 @@ exports.googleWebRiskLookupAPIFlag = (flags) => {
 
 exports.domainAgeFlag = () => {
   flagging("- Domain is less than 3 months old.");
+};
+
+exports.registrationPeriodFlag = () => {
+  flagging("- Domain is registered for only a year or lesser.");
 };
 
 exports.levelsquattingCombosquattingFlag = (trademarks) => {

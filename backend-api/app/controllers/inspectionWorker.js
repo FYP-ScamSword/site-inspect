@@ -22,6 +22,9 @@ const {
   domainAgeFlag,
   processingUrlUnshortenLog,
   processingUrlDecodeLog,
+  calculateRegistrationPeriodLog,
+  registrationPeriodFlag,
+  calculateRegistrationPeriodErrorLog,
 } = require("./logging.controller");
 
 db.mongoose
@@ -52,6 +55,7 @@ startLinkInspection = async (url, inspectedLink) => {
   const whoisUrl = await obtainWhoisInfo(url);
   inspectedLink.domain_age = whoisUrl["domain_age"];
   inspectedLink.registrar_abuse_contact = whoisUrl["registrar_abuse_contact"];
+  inspectedLink.registration_period = whoisUrl["registration_period"];
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
@@ -100,6 +104,7 @@ obtainWhoisInfo = async (url) => {
   const whoisUrl = {
     domain_age: calculateDomainAge(urlDomainInfo),
     registrar_abuse_contact: obtainRegistrar(urlDomainInfo),
+    registration_period: calculateDomainRegistrationPeriod(urlDomainInfo),
   };
 
   return whoisUrl;
@@ -141,6 +146,48 @@ calculateDomainAge = (urlDomainInfo) => {
     }
   } else {
     obtainDomainAgeLog(calculateDomainAge.name, "Domain not found");
+
+    return null;
+  }
+};
+
+calculateDomainRegistrationPeriod = (urlDomainInfo) => {
+  /* ------------- Calculate the registration period of the domain ------------ */
+  const urlCreatedDate =
+    urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"];
+  const urlExpiryDate =
+    urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Expiry Date"];
+
+  if (urlCreatedDate && urlExpiryDate) {
+    try {
+      const registrationPeriod = moment(
+        new Date(urlExpiryDate).toISOString()
+      ).diff(moment(new Date(urlCreatedDate).toISOString()), "days");
+
+      calculateRegistrationPeriodLog(
+        calculateDomainRegistrationPeriod.name,
+        registrationPeriod
+      );
+
+      if (registrationPeriod <= 366) {
+        // 366 because of leap year
+        // phishing sites usually only register for a year, but legitimate sites will register several years, and in advance
+        registrationPeriodFlag();
+      }
+
+      return registrationPeriod;
+    } catch (error) {
+      calculateRegistrationPeriodErrorLog(
+        calculateDomainRegistrationPeriod.name,
+        error
+      );
+      return null;
+    }
+  } else {
+    calculateRegistrationPeriodLog(
+      calculateDomainRegistrationPeriod.name,
+      "Domain not found"
+    );
 
     return null;
   }
