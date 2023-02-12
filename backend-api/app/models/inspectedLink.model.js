@@ -11,7 +11,8 @@ module.exports = (mongoose) => {
         domain_age: Number,
         registrar_abuse_contact: String,
         toFlag: Boolean,
-        registration_period: Number
+        registration_period: Number,
+        dga_detected: Boolean,
       },
       { timestamps: true }
     )

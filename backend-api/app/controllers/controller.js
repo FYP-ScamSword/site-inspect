@@ -43,6 +43,7 @@ exports.inspectLink = (req, res) => {
     registrar_abuse_contact: "",
     toFlag: null,
     registration_period: null,
+    dga_detected: false,
   };
 
   /* -------------------------------------------------------------------------- */

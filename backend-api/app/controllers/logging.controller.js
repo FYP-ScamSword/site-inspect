@@ -1,5 +1,7 @@
 const { parentPort } = require("worker_threads");
 
+/* --------------------------------- Logging -------------------------------- */
+
 logging = (message) => {
   if (parentPort) parentPort.postMessage(["log", message]);
 };
@@ -23,9 +25,7 @@ exports.googleSafeLookupAPINoResultsLog = () => {
 };
 
 exports.googleSafeLookupAPIErrorLog = (error) => {
-  logging(
-    formatMessage("googleSafeLookupAPI", "HTTP Error Response", error)
-  );
+  logging(formatMessage("googleSafeLookupAPI", "HTTP Error Response", error));
 };
 
 exports.googleWebRiskLookupAPILog = (value) => {
@@ -72,8 +72,16 @@ exports.calculateRegistrationPeriodLog = (methodName, value) => {
 
 exports.calculateRegistrationPeriodErrorLog = (methodName, error) => {
   logging(
-    formatMessage(methodName, "registrationPeriod", "An error occured\n" + error)
+    formatMessage(
+      methodName,
+      "registrationPeriod",
+      "An error occured\n" + error
+    )
   );
+};
+
+exports.entropyDetectionDGALog = (methodName, entropyScore) => {
+  logging(formatMessage(methodName, "entropyScore", entropyScore));
 };
 
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
@@ -120,7 +128,7 @@ exports.typosquattingBitsquattingLevenshteinDistLog = (values) => {
   );
 };
 
-// ----------------------------------------------------------------------------------------
+/* -------------------------------- Flagging -------------------------------- */
 
 flagging = (message) => {
   if (parentPort) parentPort.postMessage(["flag", message]);
@@ -142,6 +150,12 @@ exports.domainAgeFlag = () => {
 
 exports.registrationPeriodFlag = () => {
   flagging("- Domain is registered for only a year or lesser.");
+};
+
+exports.entropyDetectionDGAFlag = (entropyScore) => {
+  flagging(
+    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is >3: ${entropyScore}`
+  );
 };
 
 exports.levelsquattingCombosquattingFlag = (trademarks) => {

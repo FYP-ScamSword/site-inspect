@@ -25,7 +25,10 @@ const {
   calculateRegistrationPeriodLog,
   registrationPeriodFlag,
   calculateRegistrationPeriodErrorLog,
+  entropyDetectionDGAFlag,
+  entropyDetectionDGALog,
 } = require("./logging.controller");
+const { entropy } = require("./stringSimilarity");
 
 db.mongoose
   .set("strictQuery", true)
@@ -62,6 +65,11 @@ startLinkInspection = async (url, inspectedLink) => {
 
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
+
+  /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
+  let dgaDetected = await shannonEntropyDGADetection(url);
+
+  if (dgaDetected) inspectedLink.dga_detected = true;
 
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
@@ -191,6 +199,21 @@ calculateDomainRegistrationPeriod = (urlDomainInfo) => {
 
     return null;
   }
+};
+
+shannonEntropyDGADetection = async (url) => {
+  let parsedDomain = await parse(url);
+  let entropyScore = entropy(parsedDomain.hostname);
+
+  entropyDetectionDGALog(shannonEntropyDGADetection.name, entropyScore);
+
+  if (entropyScore > 3) {
+    //high entropy score, likely to be DGA
+    entropyDetectionDGAFlag(entropyScore);
+    return true;
+  }
+
+  return false;
 };
 
 /* -------------------------------------------------------------------------- */
