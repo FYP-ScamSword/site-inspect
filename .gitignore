@@ -6,3 +6,8 @@ npm-debug.log
 .DS_Store
 package-lock.json
 *.png
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
+*.txt

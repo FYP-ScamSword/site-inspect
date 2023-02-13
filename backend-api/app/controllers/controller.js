@@ -1,10 +1,18 @@
-const { Worker } = require("worker_threads");
-const isUrl = require("is-url");
-const request = require("request");
-const whoiser = require("whoiser");
-const fetch = require("node-fetch");
+const { Worker, parentPort } = require("worker_threads");
+const fs = require("fs");
+const moment = require("moment");
+const prependFile = require("prepend-file");
+const AWS = require("aws-sdk");
+const db = require("../models");
+const { checkIsUrl } = require("./inspection.controller");
+const InspectLinks = db.inspected_links;
+const { ObjectId } = require("mongodb");
 
-exports.inspectLink = async (req, res) => {
+// var credentials = new AWS.SharedIniFileCredentials({ profile: "default" });
+// AWS.config.credentials = credentials;
+const s3 = new AWS.S3();
+
+exports.inspectLink = (req, res) => {
   /* -------------------------------------------------------------------------- */
   /*                              Validate Request                              */
   /* -------------------------------------------------------------------------- */
@@ -14,7 +22,7 @@ exports.inspectLink = async (req, res) => {
     });
 
     return;
-  } else if (!this.checkIsUrl(req.body.inspectURL)) {
+  } else if (!checkIsUrl(req.body.inspectURL)) {
     res.status(400).send({
       message: "Invalid URL",
     });
@@ -24,117 +32,104 @@ exports.inspectLink = async (req, res) => {
 
   var url = req.body.inspectURL;
 
-  const worker = new Worker("./app/controllers/inspectionWorker.js", {
-    workerData: { url: url },
+  /* --------------------- Creating an InspectLinks object --------------------- */
+  var inspectedLink = {
+    processed_url: "",
+    original_url: url,
+    status: "processing", // status as "processing" to indicate that the processing is still ongoing
+    report: "",
+    image: "",
+    domain_age: null,
+    flag_points: 0,
+    registrar_abuse_contact: "",
+    toFlag: null
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                             Create new log file                            */
+  /* -------------------------------------------------------------------------- */
+  const fileName = moment().format("YYYY-MM-DD[_]hh-mm-ss-SSS") + ".txt";
+  fs.closeSync(fs.openSync(fileName, "w"));
+  var logger = fs.createWriteStream(fileName, {
+    flags: "a", // 'a' means appending (old data will be preserved)
   });
 
-  worker.once("message", (result) => {
-    console.log("result" + result);
+  writeLine(logger, `---------------- Inspection Logs ----------------`);
+  writeLine(logger, `exports.inspectLink= ~ | Starting inspection on ${url}`);
+
+  /* -------------------------------------------------------------------------- */
+  /*                  Create new Worker Thread to inspect link                  */
+  /* -------------------------------------------------------------------------- */
+  const worker = new Worker("./app/controllers/inspectionWorker.js", {
+    workerData: { url: url, inspectedLink: inspectedLink },
+  });
+
+  worker.on("message", (message) => {
+    if (message[0] == "log") {
+      // receive message on parent port, write message to log file
+      writeLine(logger, message[1]);
+    } else if (message[0] == "flag") {
+      prependLine(fileName, message[1]);
+    } else if (message[0] == "termination") {
+      inspectedLink = message[1];
+      inspectedLink._id = ObjectId(inspectedLink._id);
+    }
   });
 
   worker.on("error", (error) => {
-    console.log(error);
+    writeLine(logger, error);
   });
 
   worker.on("exit", (exitCode) => {
-    console.log(`It exited with code ${exitCode}`);
+    console.log(exitCode);
+    if (exitCode == 0) {
+      writeLine(logger, "Link inspection completed.");
+      prependLine(
+        fileName,
+        "--------------------- Flags ----------------------"
+      ).then(() => {
+        //configuring parameters
+        var params = {
+          Bucket: "scam-sword-link-inspection-reports",
+          Body: fs.createReadStream(fileName),
+          Key: fileName,
+        };
+  
+        s3.upload(params, function (err, data) {
+          //handle error
+          if (err) {
+            console.log("Error", err);
+          }
+  
+          //success
+          if (data) {
+            console.log(inspectedLink._id);
+            console.log("Uploaded in:", data.Location);
+            fs.unlinkSync(fileName);
+            InspectLinks.findOne(
+              { _id: inspectedLink._id },
+              function (error, record) {
+                if (error) console.log(error);
+                else {
+                  record.report = data.Location;
+                  record.save();
+                }
+              }
+            );
+          }
+        });
+      });
+    }
   });
 
   res.send({
-    message: "success",
+    message: "Link inspection request successful.",
   });
 };
 
-exports.checkIsUrl = (url) => {
-  return isUrl(url);
-};
+/* ------------------- Appends a new line to the log file ------------------- */
+writeLine = (logger, line) =>
+  logger.write(`\n${moment().toISOString()} ${line}`);
 
-exports.unshortenUrl = async (url) => {
-  const options = {
-    url: url,
-    followRedirect: false,
-  };
-
-  // Return new promise
-  return new Promise(function (resolve, reject) {
-    request.get(options, function (err, resp, body) {
-      if (err) {
-        console.log(err); // log the error
-        resolve(url); // return the original url back
-      } else {
-        if (resp.headers.location == null) resolve(url);
-        else resolve(resp.headers.location);
-      }
-    });
-  });
-};
-
-exports.decodeUrl = (url) => {
-  return decodeURIComponent(url);
-};
-
-exports.whoisLookup = async (url) => {
-  let domainInfo = await whoiser(url);
-
-  return domainInfo;
-};
-
-exports.googleSafeLookupAPI = async (url) => {
-  var req = {
-    client: {
-      clientId: "ScamSword",
-      clientVersion: "1.5.2",
-    },
-    threatInfo: {
-      threatTypes: ["MALWARE", "SOCIAL_ENGINEERING"],
-      platformTypes: ["ANY_PLATFORM"],
-      threatEntryTypes: ["URL"],
-      threatEntries: [{ url: url }],
-    },
-  };
-
-  const response = await fetch(
-    "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=" +
-      process.env.GOOGLE_API_KEY,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(req),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log(
-    "🚀 ~ file: controller.js:111 ~ exports.googleSafeLookupAPI= ~ data",
-    data
-  );
-
-  if (Object.keys(data).length == 0)
-    console.log("no output from safe browsing lookup api");
-};
-
-exports.googleWebRiskLookupAPI = async (url) => {
-  const response = await fetch(
-    `https://webrisk.googleapis.com/v1/uris:search?threatTypes=SOCIAL_ENGINEERING&threatTypes=MALWARE&uri=${url}&key=` +
-      process.env.GOOGLE_API_KEY
-  );
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log(
-    "🚀 ~ file: controller.js:132 ~ exports.googleWebRiskLookupAPI= ~ data",
-    data
-  );
-
-  if (Object.keys(data).length == 0)
-    console.log("no output from web risk lookup api");
-};
+/* ------------------- Prepends a new line to the log file ------------------- */
+prependLine = (fileName, line) => prependFile(fileName, `${line}\n`);
