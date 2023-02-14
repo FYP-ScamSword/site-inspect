@@ -154,7 +154,7 @@ exports.registrationPeriodFlag = () => {
 
 exports.entropyDetectionDGAFlag = (entropyScore) => {
   flagging(
-    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is >3: ${entropyScore}`
+    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`
   );
 };
 
