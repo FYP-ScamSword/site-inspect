@@ -1,4 +1,4 @@
-const distance = require('jaro-winkler');
+const distance = require("jaro-winkler");
 
 exports.levenshteinDistance = (str1, str2) => {
   const track = Array(str2.length + 1)
@@ -24,5 +24,17 @@ exports.levenshteinDistance = (str1, str2) => {
 };
 
 exports.jaroWinklerDistance = (str1, str2) => {
-    return distance(str1, str2);
-}
+  return distance(str1, str2);
+};
+
+// Shannon entropy
+exports.entropy = (str) => {
+  return [...new Set(str)]
+    .map((chr) => {
+      return str.match(new RegExp(chr, "g")).length;
+    })
+    .reduce((sum, frequency) => {
+      let p = frequency / str.length;
+      return sum + p * Math.log2(1 / p);
+    }, 0);
+};

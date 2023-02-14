@@ -40,9 +40,10 @@ exports.inspectLink = (req, res) => {
     report: "",
     image: "",
     domain_age: null,
-    flag_points: 0,
     registrar_abuse_contact: "",
-    toFlag: null
+    toFlag: null,
+    registration_period: null,
+    dga_detected: false,
   };
 
   /* -------------------------------------------------------------------------- */

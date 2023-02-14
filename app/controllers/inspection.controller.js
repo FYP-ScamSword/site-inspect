@@ -2,8 +2,17 @@ const isUrl = require("is-url");
 const request = require("request");
 const whoiser = require("whoiser");
 const fetch = require("node-fetch");
-const { parentPort } = require("worker_threads");
 const parse = require("parse-domains");
+const {
+  googleSafeLookupAPILog,
+  googleSafeLookupAPIErrorLog,
+  googleSafeLookupAPINoResultsLog,
+  googleSafeLookupAPIFlag,
+  googleWebRiskLookupAPIErrorLog,
+  googleWebRiskLookupAPILog,
+  googleWebRiskLookupAPINoResultsLog,
+  googleWebRiskLookupAPIFlag,
+} = require("./logging.controller");
 
 /* ------------------------- Checks if URL is valid ------------------------- */
 exports.checkIsUrl = (url) => {
@@ -72,34 +81,23 @@ exports.googleSafeLookupAPI = async (url) => {
   );
 
   if (!response.ok) {
-    parentPort.postMessage([
-      "log",
-      "exports.googleSafeLookupAPI= ~ | HTTP error response " + response.status,
-    ]);
+    googleSafeLookupAPIErrorLog(response.status);
   }
 
   const data = await response.json();
-  parentPort.postMessage([
-    "log",
-    "exports.googleSafeLookupAPI= ~ data | " + JSON.stringify(data),
-  ]);
+  googleSafeLookupAPILog(JSON.stringify(data));
 
   if (Object.keys(data).length == 0) {
     // no data returned from safe browsing lookup
-    parentPort.postMessage([
-      "log",
-      "exports.googleSafeLookupAPI= ~ | Google's Safe Browsing Lookup API returned no results.",
-    ]);
+    googleSafeLookupAPINoResultsLog();
   } else {
-    parentPort.postMessage([
-      "flag",
-      `- Flagged by Google's Safe Browsing Lookup API\n\
-        ${data["matches"]
-          .map((entry) => {
-            return entry.threatType;
-          })
-          .toString()}`,
-    ]);
+    googleSafeLookupAPIFlag(
+      data["matches"]
+        .map((entry) => {
+          return entry.threatType;
+        })
+        .toString()
+    );
   }
 };
 
@@ -114,29 +112,16 @@ exports.googleWebRiskLookupAPI = async (url) => {
   );
 
   if (!response.ok) {
-    parentPort.postMessage([
-      "log",
-      "exports.googleSafeLookupAPI= ~ | HTTP error response " + response.status,
-    ]);
+    googleWebRiskLookupAPIErrorLog(response.status);
   }
 
   const data = await response.json();
-  parentPort.postMessage([
-    "log",
-    "exports.googleWebRiskLookupAPI= ~ data | " + JSON.stringify(data),
-  ]);
+  googleWebRiskLookupAPILog(JSON.stringify(data));
 
   if (Object.keys(data).length == 0) {
     // no data returned from web risk lookup
-    parentPort.postMessage([
-      "log",
-      "exports.googleWebRiskLookupAPI= ~ | Google's Web Risk Lookup API returned no results.",
-    ]);
+    googleWebRiskLookupAPINoResultsLog();
   } else {
-    parentPort.postMessage([
-      "flag",
-      `- Flagged by Google's Web Risk Lookup API\n\
-        ${data["threat"]["threatTypes"].toString()}`,
-    ]);
+    googleWebRiskLookupAPIFlag(data["threat"]["threatTypes"].toString());
   }
 };
