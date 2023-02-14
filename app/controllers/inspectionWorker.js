@@ -207,7 +207,7 @@ shannonEntropyDGADetection = async (url) => {
 
   entropyDetectionDGALog(shannonEntropyDGADetection.name, entropyScore);
 
-  if (entropyScore > 3) {
+  if (entropyScore > 3.5) {
     //high entropy score, likely to be DGA
     entropyDetectionDGAFlag(entropyScore);
     return true;
