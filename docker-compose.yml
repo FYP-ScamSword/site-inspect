@@ -1,6 +1,6 @@
-version: "3.8"
+version: '3.8'
 
-services:  
+services:
   backend-api:
     container_name: link-inspection-backend-api
     build:
@@ -8,6 +8,6 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - "./backend-api/.env"
+    - ./backend-api/.env
     ports:
-      - "30000:8080"
+    - 30000:8080
