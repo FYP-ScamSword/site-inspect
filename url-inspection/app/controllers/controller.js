@@ -48,7 +48,7 @@ exports.inspectLink = (req, res) => {
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
   /* -------------------------------------------------------------------------- */
-  const fileName = moment().format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
+  const fileName = moment().tz("Asia/Singapore").format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
   fs.closeSync(fs.openSync(fileName, "w"));
   var logger = fs.createWriteStream(fileName, {
     flags: "a", // 'a' means appending (old data will be preserved)

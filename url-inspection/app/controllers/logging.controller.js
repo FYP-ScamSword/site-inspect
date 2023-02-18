@@ -226,7 +226,7 @@ exports.abnormalStringLenFlag = (abnormalString) => {
 
 exports.blacklistedKeywordFlag = (keyword) => {
   flagging(
-    `- The blacklisted keyword ${keyword} was spotted in the url submitted.`
+    `- The blacklisted keyword { ${keyword} } was spotted in the url submitted.`
   );
 };
 

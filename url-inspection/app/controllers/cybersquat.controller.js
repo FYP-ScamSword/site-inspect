@@ -79,7 +79,7 @@ exports.checkLevelsquattingCombosquatting = async (
   var flags = "";
   for (let i = 0; i < trademarks.length; i++) {
     if (processedparsedHostname.includes(trademarks[i].keyword)) {
-      flags += ` ${trademarks[i].keyword}`;
+      flags += `${trademarks[i].keyword}`;
 
       // only check if that was a legitimate domain if homograph wasnt detected, because the processed url from 
       // checking homograph squatting will replace the homoglyph with the corresponding character (so that further checks are more accurate) 
