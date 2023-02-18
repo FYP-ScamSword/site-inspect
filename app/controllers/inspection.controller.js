@@ -1,5 +1,4 @@
 const isUrl = require("is-url");
-const request = require("request");
 const whoiser = require("whoiser");
 const fetch = require("node-fetch");
 const parse = require("parse-domains");
