@@ -73,6 +73,25 @@ BUCKET="<s3 bucket name>"
 
 `docker-compose up -d --build`
 
+4. Once the container is up and running, you can send a request to the API:
+
+```
+POST http://localhost:30000/api/linkinspect
+{
+    "inspectURL": "<url to inspect>"
+}
+```
+
+If successful, you will see the following response:
+
+```
+{
+    "message": "Link inspection request successful."
+}
+```
+
+Log files/reports are uploaded to the S3 bucket defined in the .env file.
+
 <!-- ROADMAP -->
 
 ## Roadmap
