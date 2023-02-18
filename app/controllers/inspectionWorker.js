@@ -15,7 +15,20 @@ const {
   checkTyposquattingBitsquatting,
   checkLevelsquattingCombosquatting,
 } = require("./cybersquat.controller");
-const { logging, flagging } = require("./logging.controller");
+const {
+  cybersquattingCheckStringsLog,
+  obtainDomainAgeErrorLog,
+  obtainDomainAgeLog,
+  domainAgeFlag,
+  processingUrlUnshortenLog,
+  processingUrlDecodeLog,
+  calculateRegistrationPeriodLog,
+  registrationPeriodFlag,
+  calculateRegistrationPeriodErrorLog,
+  entropyDetectionDGAFlag,
+  entropyDetectionDGALog,
+} = require("./logging.controller");
+const { entropy } = require("./stringSimilarity");
 
 db.mongoose
   .set("strictQuery", true)
@@ -45,12 +58,18 @@ startLinkInspection = async (url, inspectedLink) => {
   const whoisUrl = await obtainWhoisInfo(url);
   inspectedLink.domain_age = whoisUrl["domain_age"];
   inspectedLink.registrar_abuse_contact = whoisUrl["registrar_abuse_contact"];
+  inspectedLink.registration_period = whoisUrl["registration_period"];
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
 
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
+
+  /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
+  let dgaDetected = await shannonEntropyDGADetection(url);
+
+  if (dgaDetected) inspectedLink.dga_detected = true;
 
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
@@ -72,11 +91,11 @@ startLinkInspection = async (url, inspectedLink) => {
 processingUrl = async (url) => {
   /* ------------------------------ unshorten url ----------------------------- */
   const unshortenedUrl = await unshortenUrl(url);
-  logging("processingUrl= ~ unshortenedUrl | " + unshortenedUrl);
+  processingUrlUnshortenLog(processingUrl.name, unshortenedUrl);
 
   /* ------------------------ decode url encoded links ------------------------ */
   const decodedUrl = decodeUrl(unshortenedUrl);
-  logging("processingUrl= ~ decodedUrl | " + decodedUrl);
+  processingUrlDecodeLog(processingUrl.name, decodedUrl);
 
   return decodedUrl;
 };
@@ -93,6 +112,7 @@ obtainWhoisInfo = async (url) => {
   const whoisUrl = {
     domain_age: calculateDomainAge(urlDomainInfo),
     registrar_abuse_contact: obtainRegistrar(urlDomainInfo),
+    registration_period: calculateDomainRegistrationPeriod(urlDomainInfo),
   };
 
   return whoisUrl;
@@ -118,26 +138,82 @@ calculateDomainAge = (urlDomainInfo) => {
         moment(new Date(urlCreatedDate).toISOString()),
         "days"
       );
-      logging("obtainDomainAge= ~ numDaysOfCreation | " + numDaysOfCreation);
+
+      obtainDomainAgeLog(calculateDomainAge.name, numDaysOfCreation);
 
       // Flag if domain is less than 3 months old
       if (numDaysOfCreation < 90) {
-        flagging("- Domain is less than 3 months old.");
+        domainAgeFlag();
       }
 
       return numDaysOfCreation;
     } catch (error) {
-      logging(
-        "obtainDomainAge= ~ numDaysOfCreation | An error occured\n" + error
-      );
+      obtainDomainAgeErrorLog(calculateDomainAge.name, error);
 
       return null;
     }
   } else {
-    logging("obtainDomainAge= ~ numDaysOfCreation | Domain not found");
+    obtainDomainAgeLog(calculateDomainAge.name, "Domain not found");
 
     return null;
   }
+};
+
+calculateDomainRegistrationPeriod = (urlDomainInfo) => {
+  /* ------------- Calculate the registration period of the domain ------------ */
+  const urlCreatedDate =
+    urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Created Date"];
+  const urlExpiryDate =
+    urlDomainInfo[Object.keys(urlDomainInfo)[0]]["Expiry Date"];
+
+  if (urlCreatedDate && urlExpiryDate) {
+    try {
+      const registrationPeriod = moment(
+        new Date(urlExpiryDate).toISOString()
+      ).diff(moment(new Date(urlCreatedDate).toISOString()), "days");
+
+      calculateRegistrationPeriodLog(
+        calculateDomainRegistrationPeriod.name,
+        registrationPeriod
+      );
+
+      if (registrationPeriod <= 366) {
+        // 366 because of leap year
+        // phishing sites usually only register for a year, but legitimate sites will register several years, and in advance
+        registrationPeriodFlag();
+      }
+
+      return registrationPeriod;
+    } catch (error) {
+      calculateRegistrationPeriodErrorLog(
+        calculateDomainRegistrationPeriod.name,
+        error
+      );
+      return null;
+    }
+  } else {
+    calculateRegistrationPeriodLog(
+      calculateDomainRegistrationPeriod.name,
+      "Domain not found"
+    );
+
+    return null;
+  }
+};
+
+shannonEntropyDGADetection = async (url) => {
+  let parsedDomain = await parse(url);
+  let entropyScore = entropy(parsedDomain.hostname);
+
+  entropyDetectionDGALog(shannonEntropyDGADetection.name, entropyScore);
+
+  if (entropyScore > 3) {
+    //high entropy score, likely to be DGA
+    entropyDetectionDGAFlag(entropyScore);
+    return true;
+  }
+
+  return false;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -154,7 +230,7 @@ checkCybersquatting = async (url) => {
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 
-  logging(`checkCybersquatting= ~checkStrings | ${checkStrings}`);
+  cybersquattingCheckStringsLog(checkCybersquatting.name, checkStrings);
 
   /* --------------- Check For Levelsquatting or Combosquatting --------------- */
   const trademarks = await KnownSites.find({});
@@ -163,24 +239,8 @@ checkCybersquatting = async (url) => {
     parsedDomain.hostname
   );
 
-  if (levelCombosquattingDetected[0]) {
-    logging(
-      `checkLevelsquattingCombosquatting= ~trademark |${levelCombosquattingDetected[1]}`
-    );
-
-    flagging(
-      `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${levelCombosquattingDetected[1]} } found`
-    );
-
-    return true;
-  } else {
-    if (levelCombosquattingDetected[1] == "legit") {
-      logging(
-        `checkLevelsquattingCombosquatting= ~This is a legitimate domain.`
-      );
-      return false;
-    }
-  }
+  if (levelCombosquattingDetected) return true;
+  else if (levelCombosquattingDetected == null) return false; //is a legitimate domain, stop the checks
 
   /* ---- Check for Typosquatting/Bitsquatting with string similarity algos --- */
   const typoBitsquattingDetected = checkTyposquattingBitsquatting(
@@ -188,13 +248,7 @@ checkCybersquatting = async (url) => {
     checkStrings
   );
 
-  logging(typoBitsquattingDetected[1]);
-
-  if (typoBitsquattingDetected[0]) {
-    flagging(typoBitsquattingDetected[2]);
-
-    return true;
-  }
+  if (typoBitsquattingDetected) return true;
 };
 
 terminatingWorker = (inspectedLink) => {
