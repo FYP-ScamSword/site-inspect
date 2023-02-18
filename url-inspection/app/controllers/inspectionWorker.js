@@ -244,7 +244,6 @@ checkSubdStrLength = async (url) => {
 };
 
 checkKeywordBlacklist = async (url) => {
-  console.log(url);
   var blacklist = await KeywordBlacklist.find({});
   blacklist = blacklist.map((record) => record.blacklist_keyword);
 
