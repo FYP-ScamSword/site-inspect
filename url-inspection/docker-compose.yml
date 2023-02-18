@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  backend-api:
-    container_name: link-inspection-backend-api
+  url-inspection:
+    container_name: link-inspection-url-inspection
     build:
-      context: ./backend-api
+      context: ./url-inspection
       dockerfile: Dockerfile
     restart: always
     env_file:
-    - ./backend-api/.env
+    - ./url-inspection/.env
     ports:
     - 30000:8080
