@@ -52,6 +52,14 @@ exports.processingUrlUnshortenLog = (methodName, value) => {
   logging(formatMessage(methodName, "unshortenedUrl", value));
 };
 
+exports.processingUrlRedirectsLog = (methodName, redirectsArray) => {
+  logging(formatMessage(methodName, "redirections", redirectsArray));
+};
+
+exports.processingUrlCountRedirectsLog = (methodName, value) => {
+  logging(formatMessage(methodName, "numRedirections", value));
+};
+
 exports.processingUrlDecodeLog = (methodName, value) => {
   logging(formatMessage(methodName, "decodedUrl", value));
 };
@@ -152,6 +160,12 @@ exports.typosquattingBitsquattingLevenshteinDistLog = (values) => {
 
 flagging = (message) => {
   if (parentPort) parentPort.postMessage(["flag", message]);
+};
+
+exports.abnormalNumRedirections = (numRedirections) => {
+  flagging(
+    `- The number of redirections is abnormal (> 2): ${numRedirections}`
+  );
 };
 
 exports.googleSafeLookupAPIFlag = (flags) => {
