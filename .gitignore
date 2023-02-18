@@ -12,3 +12,5 @@ package-lock.json
 !.env.vault
 *.txt
 __pycache__/
+!/web-crawler/src/assets/favicons/*
+.DS_Store
