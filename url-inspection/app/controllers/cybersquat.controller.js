@@ -32,10 +32,15 @@ exports.checkHomographsquatting = (url) => {
       homoglyphsFound.push(e);
 
       // find the corresponding character (key) from homographsList in homoglyphs.js
-      let corrCharacter = Object.keys(homoglyphsList).find(key => homoglyphsList[key].includes(convertToUnicode(e)));
+      let corrCharacter = Object.keys(homoglyphsList).find((key) =>
+        homoglyphsList[key].includes(convertToUnicode(e))
+      );
 
       // replace the homoglyph with the corresponding character
-      processedUrl = processedUrl.replace(e, String.fromCharCode(parseInt(corrCharacter,16))) // replace e with the corresponding character
+      processedUrl = processedUrl.replace(
+        e,
+        String.fromCharCode(parseInt(corrCharacter, 16))
+      ); // replace e with the corresponding character
     }
   });
 
@@ -81,13 +86,15 @@ exports.checkLevelsquattingCombosquatting = async (
     if (processedparsedHostname.includes(trademarks[i].keyword)) {
       flags += `${trademarks[i].keyword}`;
 
-      // only check if that was a legitimate domain if homograph wasnt detected, because the processed url from 
-      // checking homograph squatting will replace the homoglyph with the corresponding character (so that further checks are more accurate) 
+      // only check if that was a legitimate domain if homograph wasnt detected, because the processed url from
+      // checking homograph squatting will replace the homoglyph with the corresponding character (so that further checks are more accurate)
       // which means it may be seem "legitimate" after processing
       // e.g. https://microsoꬵt.com will be become https://microsoft.com after homograph processing but its not actually https://microsoft.com
       // so skip the legitimate domain check
       if (homographDetected == false) {
-        if (await this.checkLegitimateDomain(trademarks[i].url, parsedHostname)) {
+        if (
+          await this.checkLegitimateDomain(trademarks[i].url, parsedHostname)
+        ) {
           levelsquattingCombosquattingLegitimateLog();
           return null;
         }
