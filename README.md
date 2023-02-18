@@ -30,6 +30,8 @@ A full-stack web application which inspects facilitates the process of inspectin
 
 For more information on DNS registrars and takedown methods, refer to our [research document](./RESEARCH.md)
 
+For more information on the URL inspection feature, refer to our [url inspection document](./URLINSPECTION.md)
+
 ### Built With
 
 - [Node.js](https://nodejs.org/en/)
