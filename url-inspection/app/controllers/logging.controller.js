@@ -52,6 +52,14 @@ exports.processingUrlUnshortenLog = (methodName, value) => {
   logging(formatMessage(methodName, "unshortenedUrl", value));
 };
 
+exports.processingUrlRedirectsLog = (methodName, redirectsArray) => {
+  logging(formatMessage(methodName, "redirections", redirectsArray));
+};
+
+exports.processingUrlCountRedirectsLog = (methodName, value) => {
+  logging(formatMessage(methodName, "numRedirections", value));
+};
+
 exports.processingUrlDecodeLog = (methodName, value) => {
   logging(formatMessage(methodName, "decodedUrl", value));
 };
@@ -82,6 +90,26 @@ exports.calculateRegistrationPeriodErrorLog = (methodName, error) => {
 
 exports.entropyDetectionDGALog = (methodName, entropyScore) => {
   logging(formatMessage(methodName, "entropyScore", entropyScore));
+};
+
+exports.abnormalStringLenLog = (methodName, checkedStr) => {
+  logging(
+    formatMessage(
+      methodName,
+      "stringLength",
+      `Checking length of string ${checkedStr}: ${checkedStr.length}`
+    )
+  );
+};
+
+exports.blacklistedKeywordLog = (methodName, keyword) => {
+  logging(
+    formatMessage(
+      methodName,
+      "blacklistKeyword",
+      `Checking url for blacklisted keyword ${keyword}`
+    )
+  );
 };
 
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
@@ -134,6 +162,12 @@ flagging = (message) => {
   if (parentPort) parentPort.postMessage(["flag", message]);
 };
 
+exports.abnormalNumRedirections = (numRedirections) => {
+  flagging(
+    `- The number of redirections is abnormal (> 2): ${numRedirections}`
+  );
+};
+
 exports.googleSafeLookupAPIFlag = (flags) => {
   flagging(`- Flagged by Google's Safe Browsing Lookup API\n\
   ${flags}`);
@@ -154,7 +188,19 @@ exports.registrationPeriodFlag = () => {
 
 exports.entropyDetectionDGAFlag = (entropyScore) => {
   flagging(
-    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is >3: ${entropyScore}`
+    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`
+  );
+};
+
+exports.abnormalStringLenFlag = (abnormalString) => {
+  flagging(
+    `- The length of the subdomain ${abnormalString} is abnormal (>= 15) with a length of ${abnormalString.length}`
+  );
+};
+
+exports.blacklistedKeywordFlag = (keyword) => {
+  flagging(
+    `- The blacklisted keyword ${keyword} was spotted in the url submitted.`
   );
 };
 

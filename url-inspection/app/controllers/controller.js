@@ -1,7 +1,6 @@
-const { Worker, parentPort } = require("worker_threads");
+const { Worker } = require("worker_threads");
 const fs = require("fs");
-const moment = require("moment");
-const prependFile = require("prepend-file");
+const moment = require("moment-timezone");
 const AWS = require("aws-sdk");
 const db = require("../models");
 const { checkIsUrl } = require("./inspection.controller");
@@ -49,14 +48,15 @@ exports.inspectLink = (req, res) => {
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
   /* -------------------------------------------------------------------------- */
-  const fileName = moment().format("YYYY-MM-DD[_]hh-mm-ss-SSS") + ".txt";
+  const fileName = moment().format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
   fs.closeSync(fs.openSync(fileName, "w"));
   var logger = fs.createWriteStream(fileName, {
     flags: "a", // 'a' means appending (old data will be preserved)
   });
 
-  writeLine(logger, `---------------- Inspection Logs ----------------`);
-  writeLine(logger, `exports.inspectLink= ~ | Starting inspection on ${url}`);
+  var reportStr = "";
+  reportStr += "\n---------------- Inspection Logs ----------------";
+  reportStr += `\n${logTime()} exports.inspectLink= ~ | Starting inspection on ${url}`;
 
   /* -------------------------------------------------------------------------- */
   /*                  Create new Worker Thread to inspect link                  */
@@ -68,9 +68,9 @@ exports.inspectLink = (req, res) => {
   worker.on("message", (message) => {
     if (message[0] == "log") {
       // receive message on parent port, write message to log file
-      writeLine(logger, message[1]);
+      reportStr += `\n${logTime()} ${message[1]}`;
     } else if (message[0] == "flag") {
-      prependLine(fileName, message[1]);
+      reportStr = `${message[1]}\n${reportStr}`;
     } else if (message[0] == "termination") {
       inspectedLink = message[1];
       inspectedLink._id = ObjectId(inspectedLink._id);
@@ -78,47 +78,47 @@ exports.inspectLink = (req, res) => {
   });
 
   worker.on("error", (error) => {
-    writeLine(logger, error);
+    reportStr += `\n${logTime()} ${error}`;
   });
 
   worker.on("exit", (exitCode) => {
     console.log(exitCode);
     if (exitCode == 0) {
-      writeLine(logger, "Link inspection completed.");
-      prependLine(
-        fileName,
-        "--------------------- Flags ----------------------"
-      ).then(() => {
-        //configuring parameters
-        var params = {
-          Bucket: "scam-sword-link-inspection-reports",
-          Body: fs.createReadStream(fileName),
-          Key: fileName,
-        };
+      reportStr += `\n${logTime()} Link inspection completed.`;
+      reportStr =
+        "--------------------- Flags ----------------------\n" + reportStr;
 
-        s3.upload(params, function (err, data) {
-          //handle error
-          if (err) {
-            console.log("Error", err);
-          }
+      logger.write(reportStr);
 
-          //success
-          if (data) {
-            console.log(inspectedLink._id);
-            console.log("Uploaded in:", data.Location);
-            fs.unlinkSync(fileName);
-            InspectLinks.findOne(
-              { _id: inspectedLink._id },
-              function (error, record) {
-                if (error) console.log(error);
-                else {
-                  record.report = data.Location;
-                  record.save();
-                }
+      //configuring parameters
+      var params = {
+        Bucket: "scam-sword-link-inspection-reports",
+        Body: fs.createReadStream(fileName),
+        Key: fileName,
+      };
+
+      s3.upload(params, function (err, data) {
+        //handle error
+        if (err) {
+          console.log("Error", err);
+        }
+
+        //success
+        if (data) {
+          console.log(inspectedLink._id);
+          console.log("Uploaded in:", data.Location);
+          fs.unlinkSync(fileName);
+          InspectLinks.findOne(
+            { _id: inspectedLink._id },
+            function (error, record) {
+              if (error) console.log(error);
+              else {
+                record.report = data.Location;
+                record.save();
               }
-            );
-          }
-        });
+            }
+          );
+        }
       });
     }
   });
@@ -128,9 +128,6 @@ exports.inspectLink = (req, res) => {
   });
 };
 
-/* ------------------- Appends a new line to the log file ------------------- */
-writeLine = (logger, line) =>
-  logger.write(`\n${moment().toISOString()} ${line}`);
-
-/* ------------------- Prepends a new line to the log file ------------------- */
-prependLine = (fileName, line) => prependFile(fileName, `${line}\n`);
+logTime = () => {
+  return moment().tz("Asia/Singapore").format();
+};

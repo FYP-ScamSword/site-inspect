@@ -10,6 +10,7 @@ const {
 const db = require("../models");
 const InspectLinks = db.inspected_links;
 const KnownSites = db.cybersquat_known_sites;
+const KeywordBlacklist = db.keyword_blacklist;
 const parse = require("parse-domains");
 const {
   checkTyposquattingBitsquatting,
@@ -27,6 +28,10 @@ const {
   calculateRegistrationPeriodErrorLog,
   entropyDetectionDGAFlag,
   entropyDetectionDGALog,
+  abnormalStringLenLog,
+  abnormalStringLenFlag,
+  blacklistedKeywordLog,
+  blacklistedKeywordFlag,
 } = require("./logging.controller");
 const { entropy } = require("./stringSimilarity");
 
@@ -71,6 +76,12 @@ startLinkInspection = async (url, inspectedLink) => {
 
   if (dgaDetected) inspectedLink.dga_detected = true;
 
+  /* ---------------------- Check subdomain string length --------------------- */
+  await checkSubdStrLength(url);
+
+  /* ------------------------- Keyword blacklist check ------------------------ */
+  await checkKeywordBlacklist(url);
+
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
 
@@ -89,7 +100,7 @@ startLinkInspection = async (url, inspectedLink) => {
 };
 
 processingUrl = async (url) => {
-  /* ------------------------------ unshorten url ----------------------------- */
+  /* ------------------ unshorten url and count redirections ------------------ */
   const unshortenedUrl = await unshortenUrl(url);
   processingUrlUnshortenLog(processingUrl.name, unshortenedUrl);
 
@@ -207,13 +218,41 @@ shannonEntropyDGADetection = async (url) => {
 
   entropyDetectionDGALog(shannonEntropyDGADetection.name, entropyScore);
 
-  if (entropyScore > 3) {
+  if (entropyScore > 3.5) {
     //high entropy score, likely to be DGA
     entropyDetectionDGAFlag(entropyScore);
     return true;
   }
 
   return false;
+};
+
+checkSubdStrLength = async (url) => {
+  let parsedDomain = await parse(url);
+
+  const checkStrings = parsedDomain.subdomain
+    .split(".")
+    .concat(parsedDomain.siteName)
+    .filter((str) => str !== "");
+
+  for (let i = 0; i < checkStrings.length; i++) {
+    abnormalStringLenLog(checkSubdStrLength.name, checkStrings[i]);
+    if (checkStrings[i].length >= 15) {
+      abnormalStringLenFlag(checkStrings[i]);
+    }
+  }
+};
+
+checkKeywordBlacklist = async (url) => {
+  var blacklist = await KeywordBlacklist.find({});
+  blacklist = blacklist.map((record) => record.blacklist_keyword);
+
+  for (let i = 0; i < blacklist.length; i++) {
+    blacklistedKeywordLog(checkKeywordBlacklist.name, blacklist[i]);
+    if (url.includes(blacklist[i])) {
+      blacklistedKeywordFlag(blacklist[i]);
+    }
+  }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -226,7 +265,7 @@ checkCybersquatting = async (url) => {
   // e.g. internet-banking.dhs.com.sg
   // checkStrings = [internet, banking, dhs]
   const checkStrings = parsedDomain.subdomain
-    .split("-")
+    .split(/[-.]/)
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 

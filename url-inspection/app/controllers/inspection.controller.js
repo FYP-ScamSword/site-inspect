@@ -1,8 +1,8 @@
 const isUrl = require("is-url");
-const request = require("request");
 const whoiser = require("whoiser");
 const fetch = require("node-fetch");
 const parse = require("parse-domains");
+var unshort = require("unshort-tracer");
 const {
   googleSafeLookupAPILog,
   googleSafeLookupAPIErrorLog,
@@ -12,6 +12,9 @@ const {
   googleWebRiskLookupAPILog,
   googleWebRiskLookupAPINoResultsLog,
   googleWebRiskLookupAPIFlag,
+  processingUrlCountRedirectsLog,
+  processingUrlRedirectsLog,
+  abnormalNumRedirections,
 } = require("./logging.controller");
 
 /* ------------------------- Checks if URL is valid ------------------------- */
@@ -21,23 +24,22 @@ exports.checkIsUrl = (url) => {
 
 /* ------------ Unshorten any shortened URLs, e.g. bit.ly, goo.gl ----------- */
 exports.unshortenUrl = async (url) => {
-  const options = {
-    url: this.decodeUrl(url),
-    followRedirect: false,
-  };
+  try {
+    let urls = await unshort(this.decodeUrl(url));
+    processingUrlRedirectsLog("unshortenUrl", urls);
 
-  // Return new promise
-  return new Promise(function (resolve, reject) {
-    request.get(options, function (err, resp, body) {
-      if (err) {
-        console.log(err); // log the error
-        resolve(url); // return the original url back
-      } else {
-        if (resp.headers.location == null) resolve(url);
-        else resolve(resp.headers.location);
-      }
-    });
-  });
+    let numRedirections = urls.length - 1;
+    processingUrlCountRedirectsLog("unshortenUrl", numRedirections);
+
+    if (numRedirections > 2) {
+      abnormalNumRedirections(numRedirections);
+    }
+
+    return urls[urls.length - 1];
+  } catch (error) {
+    processingUrlCountRedirectsLog("unshortenUrl", 0);
+    return url;
+  }
 };
 
 /* ------------------------ Decode URL-encoded links ------------------------ */
