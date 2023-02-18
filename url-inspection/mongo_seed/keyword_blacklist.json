@@ -54,4 +54,6 @@
   "blacklist_keyword": "services"
 },{
   "blacklist_keyword": "xbox360"
+},{
+  "blacklist_keyword": "service"
 }]
