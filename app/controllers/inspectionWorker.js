@@ -10,6 +10,7 @@ const {
 const db = require("../models");
 const InspectLinks = db.inspected_links;
 const KnownSites = db.cybersquat_known_sites;
+const KeywordBlacklist = db.keyword_blacklist;
 const parse = require("parse-domains");
 const {
   checkTyposquattingBitsquatting,
@@ -29,6 +30,8 @@ const {
   entropyDetectionDGALog,
   abnormalStringLenLog,
   abnormalStringLenFlag,
+  blacklistedKeywordLog,
+  blacklistedKeywordFlag,
 } = require("./logging.controller");
 const { entropy } = require("./stringSimilarity");
 
@@ -75,6 +78,9 @@ startLinkInspection = async (url, inspectedLink) => {
 
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
+
+  /* ------------------------- Keyword blacklist check ------------------------ */
+  await checkKeywordBlacklist(url);
 
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
@@ -233,6 +239,19 @@ checkSubdStrLength = async (url) => {
     abnormalStringLenLog(checkSubdStrLength.name, checkStrings[i]);
     if (checkStrings[i].length >= 15) {
       abnormalStringLenFlag(checkStrings[i]);
+    }
+  }
+};
+
+checkKeywordBlacklist = async (url) => {
+  console.log(url);
+  var blacklist = await KeywordBlacklist.find({});
+  blacklist = blacklist.map((record) => record.blacklist_keyword);
+
+  for (let i = 0; i < blacklist.length; i++) {
+    blacklistedKeywordLog(checkKeywordBlacklist.name, blacklist[i]);
+    if (url.includes(blacklist[i])) {
+      blacklistedKeywordFlag(blacklist[i]);
     }
   }
 };

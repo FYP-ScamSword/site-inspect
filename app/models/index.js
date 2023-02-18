@@ -6,5 +6,6 @@ db.mongoose = mongoose;
 db.url = process.env.DBCONN;
 db.inspected_links = require("./inspectedLink.model.js")(mongoose);
 db.cybersquat_known_sites = require("./knownSite.model.js")(mongoose);
+db.keyword_blacklist = require("./keywordBlacklist.model.js")(mongoose);
 
 module.exports = db;

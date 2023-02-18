@@ -85,7 +85,23 @@ exports.entropyDetectionDGALog = (methodName, entropyScore) => {
 };
 
 exports.abnormalStringLenLog = (methodName, checkedStr) => {
-  logging(formatMessage(methodName, "stringLength: " + checkedStr, checkedStr.length));
+  logging(
+    formatMessage(
+      methodName,
+      "stringLength",
+      `Checking length of string ${checkedStr}: ${checkedStr.length}`
+    )
+  );
+};
+
+exports.blacklistedKeywordLog = (methodName, keyword) => {
+  logging(
+    formatMessage(
+      methodName,
+      "blacklistKeyword",
+      `Checking url for blacklisted keyword ${keyword}`
+    )
+  );
 };
 
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
@@ -165,6 +181,12 @@ exports.entropyDetectionDGAFlag = (entropyScore) => {
 exports.abnormalStringLenFlag = (abnormalString) => {
   flagging(
     `- The length of the subdomain ${abnormalString} is abnormal (>= 15) with a length of ${abnormalString.length}`
+  );
+};
+
+exports.blacklistedKeywordFlag = (keyword) => {
+  flagging(
+    `- The blacklisted keyword ${keyword} was spotted in the url submitted.`
   );
 };
 
