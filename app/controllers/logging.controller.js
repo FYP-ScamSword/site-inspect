@@ -84,6 +84,10 @@ exports.entropyDetectionDGALog = (methodName, entropyScore) => {
   logging(formatMessage(methodName, "entropyScore", entropyScore));
 };
 
+exports.abnormalStringLenLog = (methodName, checkedStr) => {
+  logging(formatMessage(methodName, "stringLength: " + checkedStr, checkedStr.length));
+};
+
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
   logging(formatMessage(methodName, "checkStrings", value));
 };
@@ -155,6 +159,12 @@ exports.registrationPeriodFlag = () => {
 exports.entropyDetectionDGAFlag = (entropyScore) => {
   flagging(
     `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`
+  );
+};
+
+exports.abnormalStringLenFlag = (abnormalString) => {
+  flagging(
+    `- The length of the subdomain ${abnormalString} is abnormal (>= 15) with a length of ${abnormalString.length}`
   );
 };
 

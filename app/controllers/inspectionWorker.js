@@ -27,6 +27,8 @@ const {
   calculateRegistrationPeriodErrorLog,
   entropyDetectionDGAFlag,
   entropyDetectionDGALog,
+  abnormalStringLenLog,
+  abnormalStringLenFlag,
 } = require("./logging.controller");
 const { entropy } = require("./stringSimilarity");
 
@@ -70,6 +72,9 @@ startLinkInspection = async (url, inspectedLink) => {
   let dgaDetected = await shannonEntropyDGADetection(url);
 
   if (dgaDetected) inspectedLink.dga_detected = true;
+
+  /* ---------------------- Check subdomain string length --------------------- */
+  await checkSubdStrLength(url);
 
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
@@ -216,6 +221,22 @@ shannonEntropyDGADetection = async (url) => {
   return false;
 };
 
+checkSubdStrLength = async (url) => {
+  let parsedDomain = await parse(url);
+
+  const checkStrings = parsedDomain.subdomain
+    .split(".")
+    .concat(parsedDomain.siteName)
+    .filter((str) => str !== "");
+
+  for (let i = 0; i < checkStrings.length; i++) {
+    abnormalStringLenLog(checkSubdStrLength.name, checkStrings[i]);
+    if (checkStrings[i].length >= 15) {
+      abnormalStringLenFlag(checkStrings[i]);
+    }
+  }
+};
+
 /* -------------------------------------------------------------------------- */
 /*                            Cybersquatting Checks                           */
 /* -------------------------------------------------------------------------- */
@@ -226,7 +247,7 @@ checkCybersquatting = async (url) => {
   // e.g. internet-banking.dhs.com.sg
   // checkStrings = [internet, banking, dhs]
   const checkStrings = parsedDomain.subdomain
-    .split("-")
+    .split(/[-.]/)
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 
