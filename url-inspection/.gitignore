@@ -10,3 +10,4 @@ package-lock.json
 !.env.project
 !.env.vault
 *.txt
+suslogfiles
