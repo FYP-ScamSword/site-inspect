@@ -1,6 +1,6 @@
-const { Worker, parentPort } = require("worker_threads");
+const { Worker } = require("worker_threads");
 const fs = require("fs");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const AWS = require("aws-sdk");
 const db = require("../models");
 const { checkIsUrl } = require("./inspection.controller");
@@ -48,7 +48,7 @@ exports.inspectLink = (req, res) => {
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
   /* -------------------------------------------------------------------------- */
-  const fileName = moment().format("YYYY-MM-DD[_]hh-mm-ss-SSS") + ".txt";
+  const fileName = moment().format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
   fs.closeSync(fs.openSync(fileName, "w"));
   var logger = fs.createWriteStream(fileName, {
     flags: "a", // 'a' means appending (old data will be preserved)
@@ -129,5 +129,5 @@ exports.inspectLink = (req, res) => {
 };
 
 logTime = () => {
-  return moment().toISOString();
+  return moment().tz("Asia/Singapore").format();
 };
