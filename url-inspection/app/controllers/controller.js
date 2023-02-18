@@ -92,7 +92,7 @@ exports.inspectLink = (req, res) => {
 
       //configuring parameters
       var params = {
-        Bucket: "scam-sword-link-inspection-reports",
+        Bucket: process.env.BUCKET,
         Body: fs.createReadStream(fileName),
         Key: fileName,
       };

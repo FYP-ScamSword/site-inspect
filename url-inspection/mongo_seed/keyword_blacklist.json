@@ -1,0 +1,57 @@
+[{
+  "blacklist_keyword": "account"
+},{
+  "blacklist_keyword": "alert"
+},{
+  "blacklist_keyword": "bank"
+},{
+  "blacklist_keyword": "bill"
+},{
+  "blacklist_keyword": "covid"
+},{
+  "blacklist_keyword": "credential"
+},{
+  "blacklist_keyword": "customer"
+},{
+  "blacklist_keyword": "noreply"
+},{
+  "blacklist_keyword": "invoice"
+},{
+  "blacklist_keyword": "help"
+},{
+  "blacklist_keyword": "login"
+},{
+  "blacklist_keyword": "password"
+},{
+  "blacklist_keyword": "security"
+},{
+  "blacklist_keyword": "sign-in"
+},{
+  "blacklist_keyword": "signin"
+},{
+  "blacklist_keyword": "support"
+},{
+  "blacklist_keyword": "update"
+},{
+  "blacklist_keyword": "installment"
+},{
+  "blacklist_keyword": "bet"
+},{
+  "blacklist_keyword": "mailer"
+},{
+  "blacklist_keyword": "online"
+},{
+  "blacklist_keyword": "healthcare"
+},{
+  "blacklist_keyword": "promo"
+},{
+  "blacklist_keyword": "roulette"
+},{
+  "blacklist_keyword": "secure"
+},{
+  "blacklist_keyword": "credit"
+},{
+  "blacklist_keyword": "services"
+},{
+  "blacklist_keyword": "xbox360"
+}]
