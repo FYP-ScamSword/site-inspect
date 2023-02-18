@@ -100,7 +100,7 @@ startLinkInspection = async (url, inspectedLink) => {
 };
 
 processingUrl = async (url) => {
-  /* ------------------------------ unshorten url ----------------------------- */
+  /* ------------------ unshorten url and count redirections ------------------ */
   const unshortenedUrl = await unshortenUrl(url);
   processingUrlUnshortenLog(processingUrl.name, unshortenedUrl);
 
