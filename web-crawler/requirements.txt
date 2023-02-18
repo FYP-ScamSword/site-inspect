@@ -1,5 +1,8 @@
-beautifulsoup4==4.11.1
-bs4==0.0.1
-Flask==1.1.2
-Flask-Cors==3.0.9
-httplib2==0.21.0
+beautifulsoup4==4.9.3
+httplib2==0.19.1
+boto3==1.18.44
+selenium==3.141.0
+requests==2.26.0
+fastapi
+uvicorn
+chromedriver-binary==79.0.3945.36

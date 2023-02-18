@@ -1,6 +1,6 @@
 version: "3.8"
 
-services:  
+services:
   backend-api:
     container_name: link-inspection-backend-api
     build:
@@ -11,3 +11,22 @@ services:
       - "./backend-api/.env"
     ports:
       - "30000:8080"
+  web-crawler:
+    build:
+      context: ./web-crawler
+      dockerfile: Dockerfile
+    environment:
+      PYTHONUNBUFFERED: 1
+    env_file:
+      - "./web-crawler/.env"
+    ports:
+      - "30001:5001"
+  #   depends_on:
+  #     - chrome
+
+  # chrome:
+  #   image: selenium/standalone-chrome
+  #   ports: 
+  #     - 4444:4444
+  #   restart: always
+    
