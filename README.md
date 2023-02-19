@@ -45,21 +45,23 @@ For more information on the URL inspection feature, refer to our [url inspection
 
 - Node (v16 preferred)
 - Docker (optional for self-building)
+- MongoDB (optional for docker)
+  - https://www.mongodb.com/docs/manual/installation/
+- Mongo Tools (optional for docker)
+  - https://www.mongodb.com/docs/database-tools/installation/installation/
+- Environment Variables (`.env`)
+  - `GOOGLE_API_KEY`:
+    - Go to https://console.cloud.google.com, signup for an account (if you don't have one)
+    - Create a project, then go to https://console.cloud.google.com/apis/credentials and select the project
+    - Click on "Create Credentials", "API Key", and copy the API key.
+
+  - `BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`:
+    - Check out "To get your access key ID and secret access key" in https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html
+    - Go to S3 and create a bucket. The bucket's name will be `BUCKET`.
 
 ### Usage
 
-1. What you need:
-
-- `GOOGLE_API_KEY`:
-  - Go to https://console.cloud.google.com, signup for an account (if you don't have one)
-  - Create a project, then go to https://console.cloud.google.com/apis/credentials and select the project
-  - Click on "Create Credentials", "API Key", and copy the API key.
-
-- `BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`:
-  - Check out "To get your access key ID and secret access key" in https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html
-  - Go to S3 and create a bucket. The bucket's name will be `BUCKET`.
-
-2. Create `.env` file in `./url-inspection`
+1. Create `.env` file in `./url-inspection`
 ```
 GOOGLE_API_KEY=<Your google API key>
 DBCONN=mongodb://mongodb:27017/link_inspection
@@ -72,13 +74,9 @@ BUCKET="<s3 bucket name>"
 
 **To run the app locally:**
 
-3. You will also need to install `mongodb` and `mongo tools`
+2. Note that you will need `mongodb` and `mongo tools` as mentioned in the [prequisites](#prerequisites) section.
 
-https://www.mongodb.com/docs/database-tools/installation/installation/
-
-https://www.mongodb.com/docs/manual/installation/
-
-4. Run the following commands.
+3. Run the following commands.
 
 ```
 cd ./url-inspection
@@ -95,7 +93,7 @@ You will see the following output if it ran successfully:
 MongoDB Import Completed
 ```
 
-5. Start the application by running the following command.
+4. Start the application by running the following command.
 
 ```
 node server.js
@@ -103,7 +101,7 @@ node server.js
 
 Unless you define `PORT` in the `.env` file, it will run on port `8080`.
 
-6. Once the application is up and running, you can send a request to the API:
+5. Once the application is up and running, you can send a request to the API:
 
 ```
 POST http://localhost:8080/api/linkinspect
@@ -126,11 +124,11 @@ Log files/reports are uploaded to the S3 bucket defined in the `.env` file.
 
 **To build and run as a docker container:**
 
-3. Run the following command in the root folder.
+2. Run the following command in the root folder.
 
 `docker-compose up -d --build`
 
-4. Once the container is up and running, you can send a request to the API:
+3. Once the container is up and running, you can send a request to the API:
 
 ```
 POST http://localhost:30000/api/linkinspect
