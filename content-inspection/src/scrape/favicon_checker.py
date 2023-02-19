@@ -1,19 +1,18 @@
 from io import BytesIO
-from time import sleep
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from bs4 import BeautifulSoup
 import requests
 import cv2
 import requests
 import numpy as np
-import urllib.parse
 import os
 from PIL import Image
 import pyemd
 
+
 # Get the current directory of the script
-script_dir = os.path.dirname(__file__)
+script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Construct the path to the image directory (assuming it's located in a directory called "assets" in the same directory as the script)
 directory = os.path.join(script_dir, "assets", "favicons")
@@ -34,44 +33,6 @@ for image_file in image_files:
     except Exception as e:
         print(f"Failed to read image {image_file}: {e}")
 
-
-def find_suspicious_inputs(soup: BeautifulSoup) -> List[str]:
-    # Find all form inputs on the webpage
-    form_inputs = soup.find_all('input')
-
-    # TODO: look for placeholder
-    # TODO: Classify type of suspicious input in array (i.e. "EMail":"<input/>")
-    suspicious_inputs = []
-    for form_input in form_inputs:
-        type = form_input.get('type')
-        name = form_input.get('name')
-        if type is None:
-            continue
-        if type == 'text' and (name is not None and ('card' in name or 'credit' in name)):
-            # This is a potential credit card input field
-            suspicious_inputs.append(str(form_input))
-        if type == 'email' or (type == 'text' and name is not None and 'user' in name):
-            # This is a potential email or username input field
-            suspicious_inputs.append(str(form_input))
-
-        if type in ['password', 'text'] and not name:
-            suspicious_inputs.append(str(form_input))
-
-    return suspicious_inputs
-
-
-def find_xss_attempts(soup: BeautifulSoup) -> List[Tuple[str, str]]:
-    xss_attempts = []
-    scripts = soup.find_all('script')
-    for script in scripts:
-        script_text = str(script)
-        # TODO: include more checks
-        if 'alert(' in script_text or 'prompt(' in script_text or 'confirm(' in script_text:
-            xss_attempts.append(('Reflected', script_text))
-        elif 'document.cookie' in script_text:
-            xss_attempts.append(('Stored', script_text))
-    return xss_attempts
-
 def get_metrics(img1, img2):
     diff = cv2.subtract(img2, img1)
     err = np.sum(diff**2)
@@ -79,10 +40,10 @@ def get_metrics(img1, img2):
     msre = np.sqrt(mse)
     return mse,msre
 
-def find_similar_favicon(soup: BeautifulSoup, url: str):
+def favicon_checker(soup: BeautifulSoup, url: str) -> List[Tuple[str, List[float]]]:
     favicon_link = soup.find('link', rel='shortcut icon')
     if not favicon_link:
-        return "Can't find favicon"
+        return []
     favicon_url = favicon_link.get('href')
     print(favicon_url)
 
@@ -91,7 +52,7 @@ def find_similar_favicon(soup: BeautifulSoup, url: str):
 
     res = requests.get(favicon_url)
     if res.status_code != 200:
-        return "Failed to download favicon"
+        return []
 
     img = Image.open(BytesIO(res.content))
     input_logo = img.resize((16, 16), Image.ANTIALIAS)
@@ -116,25 +77,3 @@ def find_similar_favicon(soup: BeautifulSoup, url: str):
         emd = pyemd.emd(logo.flatten().astype(np.float64), input_logo.flatten().astype(np.float64), distance_matrix)
         similar_favicon.append({name: [mse,msre,score,emd]})
     return similar_favicon
-
-
-async def scrape_website(url: str) -> Dict[str, List[str]]:
-    # Check if URL is reachable
-    headers = {'User-Agent': 'Mozilla/5.0',
-               'ngrok-skip-browser-warning': 'true'}
-    res = requests.get(url, headers=headers)
-    if res.status_code != 200:
-        return {"error": "Invalid URL"}
-
-    # Parse HTML content using Beautiful Soup
-    soup = BeautifulSoup(res.text, 'html.parser')
-    similar_favicon = find_similar_favicon(soup, url)
-
-    suspicious_inputs = find_suspicious_inputs(soup)
-    xss_attempts = find_xss_attempts(soup)
-
-    return {
-        'suspicious_inputs': suspicious_inputs,
-        'xss_attempts': xss_attempts,
-        'similar_favicon': similar_favicon
-    }
