@@ -132,7 +132,9 @@ Log files/reports are uploaded to the S3 bucket defined in the `.env` file.
 
 2. Run the following command in the root folder.
 
-`docker-compose up -d --build`
+```
+docker-compose up -d --build
+```
 
 3. Once the container is up and running, you can send a request to the API:
 
