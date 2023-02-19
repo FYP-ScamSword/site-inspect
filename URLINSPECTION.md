@@ -19,6 +19,7 @@ This is our current implementation (subjected to changes).
 ---
 
 2. Processes the URL
+
    1. Decode and unshorten
       1. We consider that the URL may have been encoded to hide any content that may seem suspicious to the victim at the first sight. Hence, we decode the link.
       2. Unshortening the link as the link may be using a URL shortening service like bit.ly or s.id, multiple times to make the link look less suspicious.
@@ -29,6 +30,7 @@ This is our current implementation (subjected to changes).
 ---
 
 3. Conduct a whois lookup of the processed link
+
    1. This check may or may not return a result as the domain could have already been taken down.
    2. After getting the results:
       1. Calculate domain age (current date - created date)
@@ -42,6 +44,7 @@ This is our current implementation (subjected to changes).
 ---
 
 4. Google's Safe Browsing Lookup API
+
    1. As an additional check, we also send requests to [Google's Safe Browsing Lookup API](https://developers.google.com/safe-browsing/v4/lookup-api).
    
        > The Safe Browsing APIs (v4) let your client applications check URLs against Google's constantly updated lists of unsafe web resources. Examples of unsafe web resources are social engineering sites (phishing and deceptive sites) and sites that host malware or unwanted software. Any URL found on a Safe Browsing list is considered unsafe.
@@ -52,18 +55,21 @@ This is our current implementation (subjected to changes).
 ---
 
 5. Google's Web Risk Lookup API
+
    1. Similar to the previous check, but this time to [Google's Web Risk Lookup API](https://cloud.google.com/web-risk/docs/lookup-api).
    2. Flag if results were returned.
 
 ---
 
 6. Check for entropy
+
    1. Read more about it [here](https://www.splunk.com/en_us/blog/security/random-words-on-entropy-and-dns.html?301=/blog/2015/10/01/random-words-on-entropy-and-dns.html).
    2. Flag if the entropy score is more than the defined threshold.
 
 ---
 
 7. Check for the string length of subdomains
+
    1. Phishing sites sometimes have unusually long subdomains, which sometimes also trigger the entropy check as they are long random characters. But sometimes, these long subdomains could be strings that make sense as well. 
    
       For e.g.:
@@ -75,6 +81,7 @@ This is our current implementation (subjected to changes).
 ---
 
 8. Check for blacklisted keywords in URL
+
    1. It has been noted that phishing sites often used a series of keywords, as part of cybersquatting (the next section). As an additional check, we also check for usage of such keywords within the URL, for example:
       ```
       security
@@ -127,6 +134,7 @@ This is our current implementation (subjected to changes).
 
         1. For this check, we store a dictionary of alphanumeric characters and their homoglyphs. A list of "valid" characters is also stored. 
         2. We check the URL for any presence of homoglyphs based on the list of valid characters.
+        
            1. Flag if homoglyphs found.
            2. We also replace the homoglyphs with their corresponding characters before continuing on with the checks to increase the accuracy of later checks.
 
@@ -136,16 +144,18 @@ This is our current implementation (subjected to changes).
         > Levelsquatting domains, such as the case of safety.microsoft.com.mdmfmztwjj.l6kan7uf04p102xmpq[.]bid, include the targeted brand’s domain name as a subdomain. In this example, the victims of the phishing attack might believe they are visiting safety.microsoft.com, when instead, they are visiting the attacker’s website. This attack is especially worrisome for mobile users because the browser's address bar might not be wide enough to display the entire domain name. 
 
         1. For this check, we look for direct usage of the trademarks of commonly-abused domains after processing the url to remove any `-` or `.`. In this case, removing `.` is because it could be a levelsquat, and `-` because it could be a combosquat.
+        
            1. With consideration that a legitimate URL may have been submitted, we also compare the SLD and TLD or the URL with the legitimate site as the combination of SLD and TLD are unique to the company/organization.
            2. Flag if any direct usage of a trademark was found and if it was not a legitimate domain.
 
   4. Typosquatting & Bitsquatting
      1. As both types of squatting are very similar, they were combined into a single check.
      2. We check for string similarity between strings in the URL against the trademarks of commonly-abused domains.
+     
         1. Jaro-Winkler Algorithm
         2. Levenshtein Distance Algorithm
         3. Flag if it exceeds a threshold defined.
  
  10. Once all checks are completed, we terminate the worker thread and upload the report to an S3 bucket which will be used in our frontend application and also used by our content-inspection feature.
-    1. Also updates the record in the DB, status from `processing` to `processed`.
-    2. Also updates any additional information collected during the checks, such as the URL to the report in the S3 bucket, the domain_age, the registrar_content, etc.
+      1. Also updates the record in the DB, status from `processing` to `processed`.
+      2. Also updates any additional information collected during the checks, such as the URL to the report in the S3 bucket, the domain_age, the registrar_content, etc.
