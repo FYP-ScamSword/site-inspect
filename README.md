@@ -93,7 +93,13 @@ You will see the following output if it ran successfully:
 MongoDB Import Completed
 ```
 
-4. Start the application by running the following command.
+4. Install the dependencies.
+
+```
+npm install
+```
+
+5. Start the application by running the following command.
 
 ```
 node server.js
@@ -101,7 +107,7 @@ node server.js
 
 Unless you define `PORT` in the `.env` file, it will run on port `8080`.
 
-5. Once the application is up and running, you can send a request to the API:
+6. Once the application is up and running, you can send a request to the API:
 
 ```
 POST http://localhost:8080/api/linkinspect
