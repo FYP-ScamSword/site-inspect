@@ -10,7 +10,7 @@ This file will then be uploaded to a bucket on S3.
 
 This is our current implementation (subjected to changes).
 
-![1676783522557](image/URLINSPECTION/1676783522557.png)
+![1676904326420](image/URLINSPECTION/1676904326420.png)
 
 ### How does it work?
 
