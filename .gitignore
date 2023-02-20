@@ -6,6 +6,7 @@ npm-debug.log
 .DS_Store
 package-lock.json
 *.png
+!image/URLINSPECTION/*.png
 .env*
 .flaskenv*
 !.env.project
