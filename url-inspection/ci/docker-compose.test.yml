@@ -5,7 +5,7 @@ services:
     image: mongo
     ports:
     - 27017:27017
-  link-inspection-backend-jest:
+  link-inspection-url-inspection-jest:
     build:
       context: ../
       dockerfile: ci/Dockerfile.test

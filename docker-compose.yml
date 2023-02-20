@@ -1,16 +1,32 @@
 version: '3.8'
 
 services:
-  backend-api:
-    container_name: link-inspection-backend-api
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    # volumes:
+    #   - ./url-inspection/data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+  mongo-seed:
     build:
-      context: ./backend-api
+      context: ./url-inspection/mongo_seed
       dockerfile: Dockerfile
+    depends_on:
+    - mongodb
+  url-inspection:
+    depends_on: 
+    - mongodb
+    container_name: link-inspection-url-inspection
+    build:
+      context: ./url-inspection
+      dockerfile: ./Dockerfile
     restart: always
     env_file:
-    - ./backend-api/.env
+    - ./url-inspection/.env
     ports:
-      - "30000:8080"
+    - 30000:8080
   web-crawler:
     build:
       context: ./web-crawler

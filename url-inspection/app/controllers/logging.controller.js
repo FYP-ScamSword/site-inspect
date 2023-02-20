@@ -112,6 +112,32 @@ exports.blacklistedKeywordLog = (methodName, keyword) => {
   );
 };
 
+exports.homographsquattingLog = (homoglyphsDetected) => {
+  logging(
+    formatMessage(
+      "checkHomographSquatting",
+      "homoglyphsDetected",
+      homoglyphsDetected
+    )
+  );
+};
+
+exports.homographsquattingBeforeProcessLog = (url) => {
+  logging(
+    formatMessage("checkHomographSquatting", "beforeProcessHomographUrl", url)
+  );
+};
+
+exports.homographsquattingProcessedLog = (processedUrl) => {
+  logging(
+    formatMessage(
+      "checkHomographSquatting",
+      "processedHomographUrl",
+      processedUrl
+    )
+  );
+};
+
 exports.cybersquattingCheckStringsLog = (methodName, value) => {
   logging(formatMessage(methodName, "checkStrings", value));
 };
@@ -200,13 +226,17 @@ exports.abnormalStringLenFlag = (abnormalString) => {
 
 exports.blacklistedKeywordFlag = (keyword) => {
   flagging(
-    `- The blacklisted keyword ${keyword} was spotted in the url submitted.`
+    `- The blacklisted keyword { ${keyword} } was spotted in the url submitted.`
   );
+};
+
+exports.homographsquattingFlag = (homoglyphs) => {
+  flagging(`- Homoglyphs Detected in the URL\n\t- { ${homoglyphs} }`);
 };
 
 exports.levelsquattingCombosquattingFlag = (trademarks) => {
   flagging(
-    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${trademarks} } found`
+    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) { ${trademarks} } found`
   );
 };
 

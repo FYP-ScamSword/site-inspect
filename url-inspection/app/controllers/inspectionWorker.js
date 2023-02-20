@@ -15,6 +15,7 @@ const parse = require("parse-domains");
 const {
   checkTyposquattingBitsquatting,
   checkLevelsquattingCombosquatting,
+  checkHomographsquatting,
 } = require("./cybersquat.controller");
 const {
   cybersquattingCheckStringsLog,
@@ -64,18 +65,18 @@ startLinkInspection = async (url, inspectedLink) => {
   inspectedLink.domain_age = whoisUrl["domain_age"];
   inspectedLink.registrar_abuse_contact = whoisUrl["registrar_abuse_contact"];
   inspectedLink.registration_period = whoisUrl["registration_period"];
-
+  
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
 
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
-
+  
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
   let dgaDetected = await shannonEntropyDGADetection(url);
 
   if (dgaDetected) inspectedLink.dga_detected = true;
-
+  
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
 
@@ -259,6 +260,13 @@ checkKeywordBlacklist = async (url) => {
 /*                            Cybersquatting Checks                           */
 /* -------------------------------------------------------------------------- */
 checkCybersquatting = async (url) => {
+
+  /* ---------------------- Check For Homographsquatting ---------------------- */
+  const homographProcessedUrl = checkHomographsquatting(url);
+
+  let homographDetected = homographProcessedUrl !== url;
+  url = homographProcessedUrl;
+
   let parsedDomain = await parse(url);
 
   // checkStrings will comprise of the subdomain and the site name:
@@ -275,7 +283,8 @@ checkCybersquatting = async (url) => {
   const trademarks = await KnownSites.find({});
   const levelCombosquattingDetected = await checkLevelsquattingCombosquatting(
     trademarks,
-    parsedDomain.hostname
+    parsedDomain.hostname,
+    homographDetected
   );
 
   if (levelCombosquattingDetected) return true;

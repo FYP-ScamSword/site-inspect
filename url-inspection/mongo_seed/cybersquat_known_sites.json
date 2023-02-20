@@ -1,0 +1,41 @@
+[{
+  "url": "https://www.dbs.com.sg",
+  "organization": "DBS Bank Ltd",
+  "keyword": "dbs"
+},{
+  "url": "https://www.paypal.com",
+  "organization": "PayPal Holdings, Inc.",
+  "keyword": "paypal"
+},{
+  "url": "https://www.apple.com",
+  "organization": "Apple Inc.",
+  "keyword": "apple"
+},{
+  "url": "https://www.amazon.sg",
+  "organization": "Amazon.com, Inc.",
+  "keyword": "amazon"
+},{
+  "url": "https://store.steampowered.com",
+  "organization": "Steam",
+  "keyword": "steam"
+},{
+  "url": "https://www.xbox.com",
+  "organization": "Xbox",
+  "keyword": "xbox"
+},{
+  "url": "https://www.microsoft.com",
+  "organization": "Microsoft Corporation",
+  "keyword": "microsoft"
+},{
+  "url": "https://www.facebook.com",
+  "organization": "Facebook",
+  "keyword": "facebook"
+},{
+  "url": "https://www.instagram.com",
+  "organization": "Instagram",
+  "keyword": "instagram"
+},{
+  "url": "https://www.icloud.com",
+  "organization": "Apple iCloud",
+  "keyword": "icloud"
+}]
