@@ -73,9 +73,7 @@ startLinkInspection = async (url, inspectedLink) => {
   await googleWebRiskLookupAPI(url);
   
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
-  let dgaDetected = await shannonEntropyDGADetection(url);
-
-  if (dgaDetected) inspectedLink.dga_detected = true;
+  await shannonEntropyDGADetection(url);
   
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
@@ -86,7 +84,7 @@ startLinkInspection = async (url, inspectedLink) => {
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
 
-  if (!cyberSquattingDetected) inspectedLink.toFlag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
+  if (!cyberSquattingDetected) inspectedLink.to_flag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
 
   inspectedLink.status = "processed";
 
