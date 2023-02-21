@@ -7,7 +7,6 @@ from .favicon_checker import favicon_checker
 from .form_checker import form_checker
 from .xss_checker import xss_checker
 
-print(__package__)
 async def scrape_website(url: str) -> Dict[str, List[str]]:
     # Check if URL is reachable
     headers = {'User-Agent': 'Mozilla/5.0',
