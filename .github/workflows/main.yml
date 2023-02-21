@@ -60,7 +60,7 @@ jobs:
   unit-test-content-inspection:
     runs-on: ubuntu-latest
     env:
-      PYTHONPATH: "${PYTHONPATH}:$(pwd)/content-inspection/src"
+      PYTHONPATH: "${PYTHONPATH}:$(pwd)/src"
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
