@@ -30,7 +30,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
-    - name: Install Dependencies
+    - name: Install dependencies
       working-directory: url-inspection
       run: npm install
     - name: Run test
@@ -61,13 +61,15 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.names == '["content-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: "${PYTHONPATH}:$(pwd)/content-inspection/src"
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    - name: Install dependencies
+    - name: Install Dependencies
       working-directory: content-inspection
       run: |
         python -m pip install --upgrade pip
