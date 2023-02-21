@@ -30,7 +30,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
-    - name: Install dependencies
+    - name: Install Dependencies
       working-directory: url-inspection
       run: npm install
     - name: Run test
