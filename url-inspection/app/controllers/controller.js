@@ -40,15 +40,30 @@ exports.inspectLink = (req, res) => {
     image: "",
     domain_age: null,
     registrar_abuse_contact: "",
-    toFlag: null,
+    to_flag: null,
     registration_period: null,
-    dga_detected: false,
+    num_flags: 0,
+  };
+
+  var flags_array = {
+    dga_flag: false,
+    redirections_flag: false,
+    domain_age_flag: false,
+    registration_period_flag: false,
+    safe_browsing_flag: false,
+    web_risk_flag: false,
+    subdomain_len_flag: false,
+    blacklisted_keyword_flag: false,
+    homographsquatting_flag: false,
+    typobitsquatting_flag: false,
+    combolevelsquatting_flag: false,
   };
 
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
   /* -------------------------------------------------------------------------- */
-  const fileName = moment().tz("Asia/Singapore").format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
+  const fileName =
+    moment().tz("Asia/Singapore").format("YYYY-MM-DD[_]HH-mm-ss-SSS") + ".txt";
   fs.closeSync(fs.openSync(fileName, "w"));
   var logger = fs.createWriteStream(fileName, {
     flags: "a", // 'a' means appending (old data will be preserved)
@@ -71,6 +86,8 @@ exports.inspectLink = (req, res) => {
       reportStr += `\n${logTime()} ${message[1]}`;
     } else if (message[0] == "flag") {
       reportStr = `${message[1]}\n${reportStr}`;
+
+      flags_array[message[2]] = true;
     } else if (message[0] == "termination") {
       inspectedLink = message[1];
       inspectedLink._id = ObjectId(inspectedLink._id);
@@ -108,12 +125,20 @@ exports.inspectLink = (req, res) => {
           console.log(inspectedLink._id);
           console.log("Uploaded in:", data.Location);
           fs.unlinkSync(fileName);
+
           InspectLinks.findOne(
             { _id: inspectedLink._id },
             function (error, record) {
               if (error) console.log(error);
               else {
                 record.report = data.Location;
+
+                var flags = Object.keys(flags_array);
+                flags.forEach(function (flag) {
+                  if (flags_array[flag]) record.num_flags++;
+                  record[flag] = flags_array[flag];
+                });
+
                 record.save();
               }
             }

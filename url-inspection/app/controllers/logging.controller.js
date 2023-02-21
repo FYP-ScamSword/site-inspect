@@ -184,78 +184,89 @@ exports.typosquattingBitsquattingLevenshteinDistLog = (values) => {
 
 /* -------------------------------- Flagging -------------------------------- */
 
-flagging = (message) => {
-  if (parentPort) parentPort.postMessage(["flag", message]);
+flagging = (message, flag_type) => {
+  if (parentPort) parentPort.postMessage(["flag", message, flag_type]);
 };
 
 exports.abnormalNumRedirections = (numRedirections) => {
   flagging(
-    `- The number of redirections is abnormal (> 2): ${numRedirections}`
+    `- The number of redirections is abnormal (> 2): ${numRedirections}`,
+    "redirections_flag"
   );
 };
 
 exports.googleSafeLookupAPIFlag = (flags) => {
-  flagging(`- Flagged by Google's Safe Browsing Lookup API\n\
-  ${flags}`);
+  flagging(
+    `- Flagged by Google's Safe Browsing Lookup API\n\
+  ${flags}`,
+    "safe_browsing_flag"
+  );
 };
 
 exports.googleWebRiskLookupAPIFlag = (flags) => {
-  flagging(`- Flagged by Google's Web Risk Lookup API\n\
-  ${flags}`);
+  flagging(
+    `- Flagged by Google's Web Risk Lookup API\n\
+  ${flags}`,
+    "web_risk_flag"
+  );
 };
 
 exports.domainAgeFlag = () => {
-  flagging("- Domain is less than 3 months old.");
+  flagging("- Domain is less than 3 months old.", "domain_age_flag");
 };
 
 exports.registrationPeriodFlag = () => {
-  flagging("- Domain is registered for only a year or lesser.");
+  flagging(
+    "- Domain is registered for only a year or lesser.",
+    "registration_period_flag"
+  );
 };
 
 exports.entropyDetectionDGAFlag = (entropyScore) => {
   flagging(
-    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`
+    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`,
+    "dga_flag"
   );
 };
 
 exports.abnormalStringLenFlag = (abnormalString) => {
   flagging(
-    `- The length of the subdomain ${abnormalString} is abnormal (>= 15) with a length of ${abnormalString.length}`
+    `- The length of the subdomain ${abnormalString} is abnormal (>= 15) with a length of ${abnormalString.length}`,
+    "subdomain_len_flag"
   );
 };
 
 exports.blacklistedKeywordFlag = (keyword) => {
   flagging(
-    `- The blacklisted keyword { ${keyword} } was spotted in the url submitted.`
+    `- The blacklisted keyword { ${keyword} } was spotted in the url submitted.`,
+    "blacklisted_keyword_flag"
   );
 };
 
 exports.homographsquattingFlag = (homoglyphs) => {
-  flagging(`- Homoglyphs Detected in the URL\n\t- { ${homoglyphs} }`);
+  flagging(
+    `- Homoglyphs Detected in the URL\n\t- { ${homoglyphs} }`,
+    "homographsquatting_flag"
+  );
 };
 
 exports.levelsquattingCombosquattingFlag = (trademarks) => {
   flagging(
-    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) { ${trademarks} } found`
+    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) { ${trademarks} } found`,
+    "combolevelsquatting_flag"
   );
 };
 
 exports.typosquattingBitsquattingJaroWinklerFlag = (values) => {
   flagging(
-    `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${values[0]}} with trademark {${values[1]}} is ${values[2]}`
+    `- Typosquatting/Bitsquatting Detected with Jaro-Winkler Algorithm\n\t- Similarity of {${values[0]}} with trademark {${values[1]}} is ${values[2]}`,
+    "typobitsquatting_flag"
   );
 };
 
 exports.typosquattingBitsquattingLevenshteinDistFlag = (values) => {
   flagging(
-    `- Typosquatting/Bitsquatting Detected with Levenshtein Distance\n\t- Distance of {${values[0]}} with trademark {${values[1]}} is ${values[2]}`
+    `- Typosquatting/Bitsquatting Detected with Levenshtein Distance\n\t- Distance of {${values[0]}} with trademark {${values[1]}} is ${values[2]}`,
+    "typobitsquatting_flag"
   );
-};
-
-exports.typosquattingBitsquattingFlag = (flags) => {
-  let flagArray = flags.split("\n");
-
-  for (let i = 0; i < flagArray.length; i++) {
-    flagging(flagArray);
-  }
 };
