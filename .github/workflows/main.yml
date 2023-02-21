@@ -22,7 +22,7 @@ jobs:
             - 'content-inspection/**'
   unit-test-url-inspection:
     needs: changes
-    if: ${{ needs.changes.outputs.names == '["url-inspection"]' }}
+    if: ${{ needs.changes.outputs.names == '["url-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -59,7 +59,7 @@ jobs:
       run: flyctl deploy --remote-only
   unit-test-content-inspection:
     needs: changes
-    if: ${{ needs.changes.outputs.names == '["content-inspection"]' }}
+    if: ${{ needs.changes.outputs.names == '["content-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
