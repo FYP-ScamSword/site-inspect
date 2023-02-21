@@ -59,6 +59,8 @@ jobs:
       run: flyctl deploy --remote-only
   unit-test-content-inspection:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH : /Users/claire/Documents/FYP/link-inspector/content-inspection/src
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
@@ -70,9 +72,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: set pythonpath
-      run: |
-        echo "PYTHONPATH=/home/runner/work/link-inspector/link-inspector/content-inspection/src" >> $GITHUB_ENV
     - name: Run test
-      working-directory: content-inspection
-      run: pytest
+      run: |
+        echo $PYTHONPATH
+        echo $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/content-inspection
+        python -m pytest
