@@ -22,7 +22,7 @@ jobs:
             - 'content-inspection/**'
   unit-test-url-inspection:
     needs: changes
-    if: ${{ needs.changes.outputs.names == '["url-inspection"]' }}
+    if: ${{ needs.changes.outputs.names == '["url-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -59,19 +59,24 @@ jobs:
       run: flyctl deploy --remote-only
   unit-test-content-inspection:
     needs: changes
-    if: ${{ needs.changes.outputs.names == '["content-inspection"]' }}
+    if: ${{ needs.changes.outputs.names == '["content-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH : /Users/claire/Documents/FYP/link-inspector/content-inspection/src
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    - name: Install dependencies
+    - name: Install Dependencies
       working-directory: content-inspection
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run test
-      working-directory: content-inspection
-      run: pytest
+      run: |
+        echo $PYTHONPATH
+        echo $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/content-inspection
+        python -m pytest

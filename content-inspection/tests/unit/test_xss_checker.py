@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from unittest import TestCase
 from src.scrape.xss_checker import xss_checker
 
+
 class TestXSSChecker(TestCase):
     def test_reflected_xss(self):
         soup = BeautifulSoup("""
