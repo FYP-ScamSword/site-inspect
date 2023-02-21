@@ -11,7 +11,7 @@ package-lock.json
 .flaskenv*
 !.env.project
 !.env.vault
-*.txt
+url-inspection/**/*.txt
 __pycache__/
 !/web-crawler/src/assets/favicons/*
 .DS_Store

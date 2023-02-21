@@ -65,16 +65,16 @@ startLinkInspection = async (url, inspectedLink) => {
   inspectedLink.domain_age = whoisUrl["domain_age"];
   inspectedLink.registrar_abuse_contact = whoisUrl["registrar_abuse_contact"];
   inspectedLink.registration_period = whoisUrl["registration_period"];
-  
+
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
 
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
-  
+
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
   await shannonEntropyDGADetection(url);
-  
+
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
 
