@@ -58,6 +58,8 @@ jobs:
       working-directory: url-inspection
       run: flyctl deploy --remote-only
   unit-test-content-inspection:
+    needs: changes
+    if: ${{ needs.changes.outputs.names == '["content-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
     runs-on: ubuntu-latest
     env:
       PYTHONPATH : /Users/claire/Documents/FYP/link-inspector/content-inspection/src
