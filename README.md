@@ -28,7 +28,7 @@
 
 A full-stack web application which inspects facilitates the process of inspecting suspicious links and sending takedown requests to the relevant DNS providers. This tool is intended to help with proactive scam prevention and response.
 
-For more information on DNS registrars and takedown methods, refer to our [research document](./RESEARCH.md)
+For more information on DNS registrars and takedown methods, refer to our [takedown document](./TAKEDOWN.md)
 
 For more information on the URL inspection feature, refer to our [url inspection document](./URLINSPECTION.md)
 
