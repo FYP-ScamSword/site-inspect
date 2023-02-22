@@ -1,0 +1,20 @@
+service: takedown
+frameworkVersion: '3'
+
+plugins:
+- serverless-offline
+- serverless-plugin-typescript
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: ap-southeast-1
+
+functions:
+  api:
+    handler: handler.health
+    events:
+    - httpApi:
+        path: /health
+        method: get
