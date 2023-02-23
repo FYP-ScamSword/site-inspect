@@ -8,7 +8,6 @@ import requests
 import numpy as np
 import os
 from PIL import Image
-import pyemd
 
 
 # Get the current directory of the script
@@ -74,6 +73,5 @@ def favicon_checker(soup: BeautifulSoup, url: str) -> List[Tuple[str, List[float
         for i in range(len(logo.flatten())):
             for j in range(len(input_logo.flatten())):
                 distance_matrix[i, j] = abs(i - j)
-        emd = pyemd.emd(logo.flatten().astype(np.float64), input_logo.flatten().astype(np.float64), distance_matrix)
-        similar_favicon.append({name: [mse,msre,score,emd]})
+        similar_favicon.append({name: [mse,msre,score]})
     return similar_favicon

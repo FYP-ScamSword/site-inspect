@@ -1,6 +1,6 @@
-# fly.toml file generated for misty-wave-5333 on 2023-02-21T15:13:31+08:00
+# fly.toml file generated for scamsword-content-inspection on 2023-02-23T11:33:05+08:00
 
-app = "misty-wave-5333"
+app = "scamsword-content-inspection"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -8,30 +8,31 @@ processes = []
 [env]
 
 [experimental]
-  auto_rollback = true
+auto_rollback = true
 
 [[services]]
-  http_checks = []
-  internal_port = 8080
-  processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
+http_checks = []
+internal_port = 5001
+processes = ["app"]
+protocol = "tcp"
+script_checks = []
 
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
+[services.concurrency]
+hard_limit = 25
+soft_limit = 20
+type = "connections"
 
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
+[[services.ports]]
+force_https = true
+handlers = ["http"]
+port = 80
 
-  [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
+[[services.ports]]
+handlers = ["tls", "http"]
+port = 443
+
+[[services.tcp_checks]]
+grace_period = "1s"
+interval = "15s"
+restart_limit = 0
+timeout = "2s"

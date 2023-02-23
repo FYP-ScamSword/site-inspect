@@ -96,6 +96,7 @@ exports.inspectLink = (req, res) => {
 
   worker.on("error", (error) => {
     reportStr += `\n${logTime()} ${error}`;
+    console.log(error)
   });
 
   worker.on("exit", (exitCode) => {
