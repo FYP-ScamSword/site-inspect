@@ -117,13 +117,23 @@ obtainWhoisInfo = async (url) => {
     ? urlObj.hostname.slice(4)
     : urlObj.hostname;
 
-  const urlDomainInfo = await whoisLookup(urlHostname);
+  var whoisUrl = {
+    domain_age: null,
+    registrar_abuse_contact: null,
+    registration_period: null,
+  }
 
-  const whoisUrl = {
-    domain_age: calculateDomainAge(urlDomainInfo),
-    registrar_abuse_contact: obtainRegistrar(urlDomainInfo),
-    registration_period: calculateDomainRegistrationPeriod(urlDomainInfo),
-  };
+  try {
+    const urlDomainInfo = await whoisLookup(urlHostname);
+
+    whoisUrl = {
+      domain_age: calculateDomainAge(urlDomainInfo),
+      registrar_abuse_contact: obtainRegistrar(urlDomainInfo),
+      registration_period: calculateDomainRegistrationPeriod(urlDomainInfo),
+    };
+  } catch (error) {
+    console.log(error)
+  }
 
   return whoisUrl;
 };
