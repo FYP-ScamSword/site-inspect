@@ -280,8 +280,8 @@ checkCybersquatting = async (url) => {
   // checkStrings will comprise of the subdomain and the site name:
   // e.g. internet-banking.dhs.com.sg
   // checkStrings = [internet, banking, dhs]
-  const checkStrings = parsedDomain.subdomain
-    .split(/[-.]/)
+  const checkStrings = url.replace(parsedDomain.protocol, "").slice(2)
+    .split(/[-./]/)
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");
 
