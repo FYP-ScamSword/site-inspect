@@ -33,7 +33,7 @@ class TestFormChecker(TestCase):
             <html>
             <body>
                 <form>
-                    <input type="text" name="name" placeholder="Name">
+                    <input type="number" name="name" placeholder="Name">
                 </form>
                 <p>ok</p>
             </body>
