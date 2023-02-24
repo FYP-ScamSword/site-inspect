@@ -223,17 +223,24 @@ calculateDomainRegistrationPeriod = (urlDomainInfo) => {
 
 shannonEntropyDGADetection = async (url) => {
   let parsedDomain = await parse(url);
-  let entropyScore = entropy(parsedDomain.hostname);
 
-  entropyDetectionDGALog(shannonEntropyDGADetection.name, entropyScore);
+  let stringsToCheck = parsedDomain.hostname.split(/[-.]/)
 
-  if (entropyScore > 3.5) {
-    //high entropy score, likely to be DGA
-    entropyDetectionDGAFlag(entropyScore);
-    return true;
+  let entropyDetected = false;
+
+  for (var i = 0; i < stringsToCheck.length; i++) {
+    let entropyScore = entropy(stringsToCheck[i]);
+
+    entropyDetectionDGALog(shannonEntropyDGADetection.name, stringsToCheck[i], entropyScore);
+
+    if (entropyScore > 3.5) {
+      //high entropy score, likely to be DGA
+      entropyDetected = true;
+      entropyDetectionDGAFlag(stringsToCheck[i], entropyScore);
+    }
   }
 
-  return false;
+  return entropyDetected;
 };
 
 checkSubdStrLength = async (url) => {

@@ -88,8 +88,8 @@ exports.calculateRegistrationPeriodErrorLog = (methodName, error) => {
   );
 };
 
-exports.entropyDetectionDGALog = (methodName, entropyScore) => {
-  logging(formatMessage(methodName, "entropyScore", entropyScore));
+exports.entropyDetectionDGALog = (methodName, urlPartial, entropyScore) => {
+  logging(formatMessage(methodName, "entropyScore", `${urlPartial}: ${entropyScore}`));
 };
 
 exports.abnormalStringLenLog = (methodName, checkedStr) => {
@@ -222,9 +222,9 @@ exports.registrationPeriodFlag = () => {
   );
 };
 
-exports.entropyDetectionDGAFlag = (entropyScore) => {
+exports.entropyDetectionDGAFlag = (urlPartial, entropyScore) => {
   flagging(
-    `- Likely to be a link generated with DGA (Domain Generation Algorithm), entropy score is > 3.5: ${entropyScore}`,
+    `- Likely to be a link generated with DGA (Domain Generation Algorithm), { ${urlPartial} } has an entropy score of > 3.5: ${entropyScore}`,
     "dga_flag"
   );
 };
