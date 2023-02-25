@@ -17,11 +17,7 @@ def form_checker(soup: BeautifulSoup) -> List[str]:
         if input_type == 'text' and (input_name is not None and ('card' in input_name or 'credit' in input_name)):
             # This is a potential credit card input field
             suspicious_inputs.append(str(form_input))
-        if input_type == 'email' or (input_type == 'text' and input_name is not None and 'user' in input_name):
-            # This is a potential email or userinput_name input field
-            suspicious_inputs.append(str(form_input))
-
-        if input_type in ['password', 'text'] and not input_name:
+        elif input_type in ['text', 'email', 'password', 'tel', 'hidden']:
             suspicious_inputs.append(str(form_input))
 
     return suspicious_inputs

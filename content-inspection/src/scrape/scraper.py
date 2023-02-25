@@ -19,6 +19,7 @@ async def scrape_website(url: str) -> Dict[str, List[str]]:
     soup = BeautifulSoup(res.text, 'html.parser')
 
     return {
+        'html': soup.prettify(),
         'suspicious_inputs': form_checker(soup),
         'xss_attempts':  xss_checker(soup),
         'similar_favicon': favicon_checker(soup, url)
