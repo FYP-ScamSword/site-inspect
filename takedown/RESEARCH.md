@@ -88,4 +88,3 @@ Based on general research across each provider, the following details should be 
 - Image proof
 - Verbal writeup
 - Timestamps
--

@@ -1,0 +1,12 @@
+name,email,site
+namesilo,abuse@namesilo.com,https://new.namesilo.com/phishing_report.php
+name.com,abuse@name.com,https://www.name.com/abuse
+cloudflare,registrar-abuse@cloudflare.com,https://abuse.cloudflare.com/phishing
+namecheap,lea_abuse@namecheap.com,https://support.namecheap.com/index.php?/Tickets/Submit/
+godaddy,,https://supportcenter.godaddy.com/AbuseReport
+google_domains,registrar-abuse@google.com,
+aws_route53,abuse@amazonaws.com,https://support.aws.amazon.com/#/contacts/report-abuse
+microsoft,,https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site-guest
+dreamhost,abuse@dreamhost.com,
+gandi,abuse@gandi.net,https://help.gandi.net/en/abuse
+markmonitor,abuse@markmonitor.com,
