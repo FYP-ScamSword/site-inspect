@@ -10,6 +10,10 @@ formatMessage = (methodName, variableName, value) => {
   return `${methodName} = ~${variableName} | ${value}`;
 };
 
+exports.urlPreviouslyInspectedLog = (previouslyInspected) => {
+  logging(formatMessage("startLinkInspection", "urlPreviouslyInspected", previouslyInspected));
+}
+
 exports.googleSafeLookupAPILog = (value) => {
   logging(formatMessage("googleSafeLookupAPI", "data", value));
 };
