@@ -80,33 +80,33 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/content-inspection
         python -m pytest
-  build-and-deploy-content-inspection:
-    needs: unit-test-content-inspection
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: content-inspection
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-    - name: Build Docker image
-      run: docker build -t content-inspection-image:${GITHUB_SHA} .
+  # build-and-deploy-content-inspection:
+  #   needs: unit-test-content-inspection
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: content-inspection
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v3
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v1
+  #   - name: Build Docker image
+  #     run: docker build -t content-inspection-image:${GITHUB_SHA} .
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1   # More information on this action can be found below in the 'AWS Credentials' section
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
-    - name: Login to Amazon ECR
-      run: aws-actions/amazon-ecr-login@v1
+  #   - name: Configure AWS credentials
+  #     uses: aws-actions/configure-aws-credentials@v1   # More information on this action can be found below in the 'AWS Credentials' section
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: ap-southeast-1
+  #   - name: Login to Amazon ECR
+  #     run: aws-actions/amazon-ecr-login@v1
 
 
-    - name: Tag Docker image
-      run: docker tag content-inspection-image:${GITHUB_SHA} ${secrets.CONTENT_INSPECTION_ECR_REPOSITORY_URL}:latest
+  #   - name: Tag Docker image
+  #     run: docker tag content-inspection-image:${GITHUB_SHA} ${secrets.CONTENT_INSPECTION_ECR_REPOSITORY_URL}:latest
 
-    - name: Push Docker image to Amazon ECR
-      run: docker push ${env.CONTENT_INSPECTION_ECR_REPOSITORY_URL}:latest
+  #   - name: Push Docker image to Amazon ECR
+  #     run: docker push ${env.CONTENT_INSPECTION_ECR_REPOSITORY_URL}:latest
