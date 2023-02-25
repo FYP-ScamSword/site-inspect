@@ -56,4 +56,42 @@
   "blacklist_keyword": "xbox360"
 },{
   "blacklist_keyword": "service"
+},{
+  "blacklist_keyword": "admin"
+},{
+  "blacklist_keyword": "money"
+},{
+  "blacklist_keyword": "mail"
+},{
+  "blacklist_keyword": "offer"
+},{
+  "blacklist_keyword": "sexy"
+},{
+  "blacklist_keyword": "lottery"
+},{
+  "blacklist_keyword": "poker"
+},{
+  "blacklist_keyword": "dollar"
+},{
+  "blacklist_keyword": "deal"
+},{
+  "blacklist_keyword": "vacation"
+},{
+  "blacklist_keyword": "promotion"
+},{
+  "blacklist_keyword": "promocion"
+},{
+  "blacklist_keyword": "habbo"
+},{
+  "blacklist_keyword": "bonus"
+},{
+  "blacklist_keyword": "static"
+},{
+  "blacklist_keyword": "test"
+},{
+  "blacklist_keyword": "confirm"
+},{
+  "blacklist_keyword": "deposit"
+},{
+  "blacklist_keyword": "debit"
 }]
