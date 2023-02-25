@@ -27,14 +27,14 @@ services:
     - ./url-inspection/.env
     ports:
     - 30000:8080
-  web-crawler:
+  content-inspection:
     build:
-      context: ./web-crawler
+      context: ./content-inspection
       dockerfile: Dockerfile
     environment:
       PYTHONUNBUFFERED: 1
     env_file:
-    - ./web-crawler/.env
+    - ./content-inspection/.env
     ports:
     - 30001:5001
   #   depends_on:

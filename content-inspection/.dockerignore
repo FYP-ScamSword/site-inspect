@@ -1,0 +1,11 @@
+# flyctl launch added from .gitignore
+**/__pycache__
+**/*.png
+!src/assets/favicons/*
+**/*.env
+**/.DS_Store
+
+# flyctl launch added from .pytest_cache/.gitignore
+# Created by pytest automatically.
+.pytest_cache/**/*
+fly.toml

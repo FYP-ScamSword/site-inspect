@@ -3,7 +3,6 @@ build
 npm-debug.log
 .nyc
 *.env
-.DS_Store
 package-lock.json
 *.png
 !image/URLINSPECTION/*.png
@@ -15,3 +14,9 @@ url-inspection/**/*.txt
 __pycache__/
 !/web-crawler/src/assets/favicons/*
 .DS_Store
+# Ignore Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Ignore local .terraform directories
+**/.terraform/*

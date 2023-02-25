@@ -9,3 +9,4 @@ chromedriver-binary==79.0.3945.36
 numpy==1.19.5
 opencv-python-headless==4.5.4.58
 pytest
+Pillow
