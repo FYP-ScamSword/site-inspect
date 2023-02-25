@@ -7,14 +7,31 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs16.x
   stage: dev
   region: ap-southeast-1
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+      - Effect: Allow
+        Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+        Resource:
+        - arn:aws:ses:*
 
 functions:
-  api:
-    handler: handler.health
+  health:
+    handler: src/handler.health
     events:
     - httpApi:
         path: /health
         method: get
+  sendEmail:
+    handler: src/handler.sendEmail
+    events:
+    - httpApi:
+        path: /sendEmail
+        method: post

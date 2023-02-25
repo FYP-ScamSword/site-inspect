@@ -1,27 +1,23 @@
-<!--
-title: 'AWS Simple HTTP Endpoint example in NodeJS'
-description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# ScamSword-Takedown API
 
-# Serverless Framework Node HTTP API on AWS
-
-This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.
+A set of serverless functions that enable simplified takedown requests to DNS registrars and web hosting providers. This project is built with [Serverless](https://www.serverless.com/)
 
 This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
 
 ## Usage
 
-### Deployment
+- Set up [serverless](https://www.serverless.com/framework/docs/getting-started) and AWS credentials for deployment
+
+- Install project dependencies:
+
+```bash
+npm i
+```
+
+- Deploy!
 
 ```
-$ serverless deploy
+$ sls deploy
 ```
 
 After deploying, you should see output similar to:
@@ -44,17 +40,6 @@ After successful deployment, you can call the created application via HTTP:
 
 ```bash
 curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
-
-Which should result in response similar to the following (removed `input` content for brevity):
-
-```json
-{
-  "message": "Go Serverless v2.0! Your function executed successfully!",
-  "input": {
-    ...
-  }
-}
 ```
 
 ### Local development
