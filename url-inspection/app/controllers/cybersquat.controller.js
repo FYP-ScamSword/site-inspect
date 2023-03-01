@@ -117,8 +117,13 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
 
   var flagged = false;
 
+  // get unique values in checkStrings
+  checkStrings = [...new Set(checkStrings)];
+
   for (let i = 0; i < checkStrings.length; i++) {
     for (let j = 0; j < keywords.length; j++) {
+      var levenshteinThreshold = false;
+
       var jaroWinklerSimilarity = jaroWinklerDistance(
         checkStrings[i],
         keywords[j]
@@ -130,34 +135,54 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
         jaroWinklerSimilarity,
       ]);
 
-      if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
+      var levenshteinDistSimilarity = levenshteinDistance(
+        checkStrings[i],
+        keywords[j]
+      );
+
+      typosquattingBitsquattingLevenshteinDistLog([
+        checkStrings[i],
+        keywords[j],
+        levenshteinDistSimilarity,
+      ]);
+
+      /* --------- check if levenshtein distance similarity hit threshold --------- */
+      // dist < (num chars - 1) / 2 and rounddown.
+      // example case 1: num chars 3-4
+      // (3-1)/2 and (4-1)/2 round down is 1 (so max 1 char can be modified for strings of length 3-4 to be considered typosquatting)
+      // example case 2: num chars 5-6
+      // (5-1)/2 and (6-1)/2 round down is 2 (max 2 chars can be modified for len 5-6 to be considered typosquatting)
+      // example case 3: num chars 7-8
+      // (7-1)/2 and (8-1)/2 round down is 3 (max 3 chars can be modified for len 7-8 to be considered typosquatting)
+      // example case 4: num chars 9-10
+      // (9-1)/2 and (10-1)/2 round down is 4 (max 4 chars can be modified for len 9-10 to be considered typosquatting)
+      // but for the rest of the cases (where len > 10 chars, max 5 chars can be modified - thats the upper limit)
+
+      var calcThreshold = Math.floor((checkStrings[i].length - 1)/2);
+
+      if (calcThreshold > 5) calcThreshold = 5;
+
+      if (levenshteinDistSimilarity <= calcThreshold) {
+        levenshteinThreshold = true;
+      }
+
+      /* ------ check if algos thresholds were met to fulfil typobitsquatting ----- */
+      if (jaroWinklerSimilarity >= 0.9) {
         flagged = true;
+
         typosquattingBitsquattingJaroWinklerFlag([
           checkStrings[i],
           keywords[j],
           jaroWinklerSimilarity,
         ]);
-      }
+      } else if (jaroWinklerSimilarity >= 0.75 && levenshteinThreshold == true) {
+        flagged = true;
 
-      if (jaroWinklerSimilarity > 0.6) {
-        var levenshteinDistSimilarity = levenshteinDistance(
-          checkStrings[i],
-          keywords[j]
-        );
-
-        typosquattingBitsquattingLevenshteinDistLog([
+        typosquattingBitsquattingLevenshteinDistFlag([
           checkStrings[i],
           keywords[j],
           levenshteinDistSimilarity,
         ]);
-
-        if (levenshteinDistSimilarity / checkStrings[i].length <= 1 / 3) {
-          typosquattingBitsquattingLevenshteinDistFlag([
-            checkStrings[i],
-            keywords[j],
-            levenshteinDistSimilarity,
-          ]);
-        }
       }
     }
   }
