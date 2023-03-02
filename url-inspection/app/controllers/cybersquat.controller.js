@@ -124,11 +124,13 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
         keywords[j]
       );
 
-      typosquattingBitsquattingJaroWinklerLog([
-        checkStrings[i],
-        keywords[j],
-        jaroWinklerSimilarity,
-      ]);
+      if (jaroWinklerSimilarity != 0) {
+        typosquattingBitsquattingJaroWinklerLog([
+          checkStrings[i],
+          keywords[j],
+          jaroWinklerSimilarity,
+        ]);
+      }
 
       if (parseFloat(jaroWinklerSimilarity) >= 0.75) {
         flagged = true;

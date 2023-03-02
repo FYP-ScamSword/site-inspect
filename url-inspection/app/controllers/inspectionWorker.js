@@ -35,6 +35,7 @@ const {
   blacklistedKeywordFlag,
 } = require("./logging.controller");
 const { entropy } = require("./stringSimilarity");
+const { calculateRelativeEntropy } = require("./entropy");
 
 db.mongoose
   .set("strictQuery", true)
@@ -72,9 +73,6 @@ startLinkInspection = async (url, inspectedLink) => {
   /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
   await googleWebRiskLookupAPI(url);
 
-  /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
-  await shannonEntropyDGADetection(url);
-
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
 
@@ -85,6 +83,9 @@ startLinkInspection = async (url, inspectedLink) => {
   let cyberSquattingDetected = await checkCybersquatting(url);
 
   if (!cyberSquattingDetected) inspectedLink.to_flag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
+
+  /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
+  await entropyDGADetection(url);
 
   inspectedLink.status = "processed";
 
@@ -221,20 +222,20 @@ calculateDomainRegistrationPeriod = (urlDomainInfo) => {
   }
 };
 
-shannonEntropyDGADetection = async (url) => {
-  let parsedDomain = await parse(url);
+entropyDGADetection = async (url) => {
+  let parsedUrl = await parse(url);
 
-  let stringsToCheck = parsedDomain.hostname.split(/[-.]/)
+  urlToCheck = parsedUrl.hostname.replace(`.${parsedUrl.tld}`, "");
+  if (urlToCheck.startsWith("www.")) urlToCheck = urlToCheck.slice(4);
+  stringsToCheck = urlToCheck.split(".");
 
   let entropyDetected = false;
 
   for (var i = 0; i < stringsToCheck.length; i++) {
-    let entropyScore = entropy(stringsToCheck[i]);
-
-    entropyDetectionDGALog(shannonEntropyDGADetection.name, stringsToCheck[i], entropyScore);
+    let entropyScore = calculateRelativeEntropy(stringsToCheck[i]);
+    entropyDetectionDGALog(entropyDGADetection.name, stringsToCheck[i], entropyScore);
 
     if (entropyScore > 3.5) {
-      //high entropy score, likely to be DGA
       entropyDetected = true;
       entropyDetectionDGAFlag(stringsToCheck[i], entropyScore);
     }
