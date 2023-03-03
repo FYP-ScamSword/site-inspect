@@ -17,14 +17,8 @@ subdomainLenFlagScore = 1.5;
 homographsquattingFlagScore = 3.0;
 entropyFlagScore = 2.0;
 
-checkParentPort = () => {
-  if (parentPort) return true;
-
-  return false;
-};
-
 flagScore = (score) => {
-  if (checkParentPort) parentPort.postMessage(["flagScore", score]);
+  if (parentPort) parentPort.postMessage(["flagScore", score]);
 };
 
 exports.comboLevelSquattingPostScore = (flags) => {
