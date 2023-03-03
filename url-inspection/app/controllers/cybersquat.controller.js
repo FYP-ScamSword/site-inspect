@@ -1,4 +1,10 @@
 const parse = require("parse-domains");
+const {
+  homographsquattingPostScore,
+  typoBitsquattingCaseOnePostScore,
+  typoBitsquattingCaseTwoPostScore,
+  comboLevelSquattingPostScore,
+} = require("./flagScores.controller");
 const { valid, homoglyphsList } = require("./homoglyphs");
 const {
   typosquattingBitsquattingLevenshteinDistLog,
@@ -47,6 +53,7 @@ exports.checkHomographsquatting = (url) => {
   homographsquattingLog(homoglyphsDetected);
   if (homoglyphsDetected == true) {
     homographsquattingFlag(homoglyphsFound);
+    homographsquattingPostScore(homoglyphsFound);
     homographsquattingBeforeProcessLog(url);
     homographsquattingProcessedLog(processedUrl);
 
@@ -84,7 +91,7 @@ exports.checkLevelsquattingCombosquatting = async (
   var flags = "";
   for (let i = 0; i < trademarks.length; i++) {
     if (processedparsedHostname.includes(trademarks[i].keyword)) {
-      flags += `${trademarks[i].keyword}`;
+      flags += ` ${trademarks[i].keyword}`;
 
       // only check if that was a legitimate domain if homograph wasnt detected, because the processed url from
       // checking homograph squatting will replace the homoglyph with the corresponding character (so that further checks are more accurate)
@@ -104,6 +111,7 @@ exports.checkLevelsquattingCombosquatting = async (
 
   if (flags != "") {
     levelsquattingCombosquattingFlag(flags);
+    comboLevelSquattingPostScore(flags);
     levelsquattingCombosquattingLog(flags);
     return true;
   }
@@ -160,7 +168,7 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
       // (9-1)/2 and (10-1)/2 round down is 4 (max 4 chars can be modified for len 9-10 to be considered typosquatting)
       // but for the rest of the cases (where len > 10 chars, max 5 chars can be modified - thats the upper limit)
 
-      var calcThreshold = Math.floor((checkStrings[i].length - 1)/2);
+      var calcThreshold = Math.floor((checkStrings[i].length - 1) / 2);
 
       if (calcThreshold > 5) calcThreshold = 5;
 
@@ -177,7 +185,12 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
           keywords[j],
           jaroWinklerSimilarity,
         ]);
-      } else if (jaroWinklerSimilarity >= 0.75 && levenshteinThreshold == true) {
+
+        typoBitsquattingCaseOnePostScore(jaroWinklerSimilarity);
+      } else if (
+        jaroWinklerSimilarity >= 0.75 &&
+        levenshteinThreshold == true
+      ) {
         flagged = true;
 
         typosquattingBitsquattingLevenshteinDistFlag([
@@ -185,6 +198,12 @@ exports.checkTyposquattingBitsquatting = (keywords, checkStrings) => {
           keywords[j],
           levenshteinDistSimilarity,
         ]);
+
+        typoBitsquattingCaseTwoPostScore(
+          jaroWinklerSimilarity,
+          checkStrings[i],
+          levenshteinDistSimilarity
+        );
       }
     }
   }

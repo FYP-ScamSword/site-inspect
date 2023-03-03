@@ -5,7 +5,6 @@ const {
   unshortenUrl,
   whoisLookup,
   googleSafeLookupAPI,
-  googleWebRiskLookupAPI,
 } = require("./inspection.controller");
 const db = require("../models");
 const InspectLinks = db.inspected_links;
@@ -34,8 +33,8 @@ const {
   blacklistedKeywordLog,
   blacklistedKeywordFlag,
 } = require("./logging.controller");
-const { entropy } = require("./stringSimilarity");
 const { calculateRelativeEntropy } = require("./entropy");
+const { entropyPostScore, subdomainLenPostScore, registrationPeriodPostScore, domainAgePostScore } = require("./flagScores.controller");
 
 db.mongoose
   .set("strictQuery", true)
@@ -69,9 +68,6 @@ startLinkInspection = async (url, inspectedLink) => {
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
-
-  /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
-  await googleWebRiskLookupAPI(url);
 
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
@@ -122,7 +118,7 @@ obtainWhoisInfo = async (url) => {
     domain_age: null,
     registrar_abuse_contact: null,
     registration_period: null,
-  }
+  };
 
   try {
     const urlDomainInfo = await whoisLookup(urlHostname);
@@ -133,7 +129,7 @@ obtainWhoisInfo = async (url) => {
       registration_period: calculateDomainRegistrationPeriod(urlDomainInfo),
     };
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 
   return whoisUrl;
@@ -165,6 +161,7 @@ calculateDomainAge = (urlDomainInfo) => {
       // Flag if domain is less than 3 months old
       if (numDaysOfCreation < 90) {
         domainAgeFlag();
+        domainAgePostScore();
       }
 
       return numDaysOfCreation;
@@ -202,6 +199,7 @@ calculateDomainRegistrationPeriod = (urlDomainInfo) => {
         // 366 because of leap year
         // phishing sites usually only register for a year, but legitimate sites will register several years, and in advance
         registrationPeriodFlag();
+        registrationPeriodPostScore();
       }
 
       return registrationPeriod;
@@ -233,10 +231,15 @@ entropyDGADetection = async (url) => {
 
   for (var i = 0; i < stringsToCheck.length; i++) {
     let entropyScore = calculateRelativeEntropy(stringsToCheck[i]);
-    entropyDetectionDGALog(entropyDGADetection.name, stringsToCheck[i], entropyScore);
+    entropyDetectionDGALog(
+      entropyDGADetection.name,
+      stringsToCheck[i],
+      entropyScore
+    );
 
     if (entropyScore > 3.5) {
       entropyDetected = true;
+      entropyPostScore(entropyScore);
       entropyDetectionDGAFlag(stringsToCheck[i], entropyScore);
     }
   }
@@ -256,6 +259,7 @@ checkSubdStrLength = async (url) => {
     abnormalStringLenLog(checkSubdStrLength.name, checkStrings[i]);
     if (checkStrings[i].length >= 15) {
       abnormalStringLenFlag(checkStrings[i]);
+      subdomainLenPostScore(checkStrings[i]);
     }
   }
 };
@@ -276,7 +280,6 @@ checkKeywordBlacklist = async (url) => {
 /*                            Cybersquatting Checks                           */
 /* -------------------------------------------------------------------------- */
 checkCybersquatting = async (url) => {
-
   /* ---------------------- Check For Homographsquatting ---------------------- */
   const homographProcessedUrl = checkHomographsquatting(url);
 
@@ -288,7 +291,9 @@ checkCybersquatting = async (url) => {
   // checkStrings will comprise of the subdomain and the site name:
   // e.g. internet-banking.dhs.com.sg
   // checkStrings = [internet, banking, dhs]
-  const checkStrings = url.replace(parsedDomain.protocol, "").slice(2)
+  const checkStrings = url
+    .replace(parsedDomain.protocol, "")
+    .slice(2)
     .split(/[-./]/)
     .concat(parsedDomain.siteName)
     .filter((str) => str !== "");

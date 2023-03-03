@@ -24,6 +24,7 @@ module.exports = (mongoose) => {
         homographsquatting_flag: Boolean,
         typobitsquatting_flag: Boolean,
         combolevelsquatting_flag: Boolean,
+        flag_score: Number,
       },
       { timestamps: true }
     )

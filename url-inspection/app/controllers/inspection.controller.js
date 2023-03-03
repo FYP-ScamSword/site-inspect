@@ -8,14 +8,11 @@ const {
   googleSafeLookupAPIErrorLog,
   googleSafeLookupAPINoResultsLog,
   googleSafeLookupAPIFlag,
-  googleWebRiskLookupAPIErrorLog,
-  googleWebRiskLookupAPILog,
-  googleWebRiskLookupAPINoResultsLog,
-  googleWebRiskLookupAPIFlag,
   processingUrlCountRedirectsLog,
   processingUrlRedirectsLog,
-  abnormalNumRedirections,
+  abnormalNumRedirectionsFlag,
 } = require("./logging.controller");
+const { redirectionsPostScore, safeBrowsingPostScore } = require("./flagScores.controller");
 
 /* ------------------------- Checks if URL is valid ------------------------- */
 exports.checkIsUrl = (url) => {
@@ -32,7 +29,8 @@ exports.unshortenUrl = async (url) => {
     processingUrlCountRedirectsLog("unshortenUrl", numRedirections);
 
     if (numRedirections > 2) {
-      abnormalNumRedirections(numRedirections);
+      abnormalNumRedirectionsFlag(numRedirections);
+      redirectionsPostScore(numRedirections);
     }
 
     return urls[urls.length - 1];
@@ -100,30 +98,7 @@ exports.googleSafeLookupAPI = async (url) => {
         })
         .toString()
     );
-  }
-};
 
-/* ----------------------- Google Web Risk Lookup API ----------------------- */
-exports.googleWebRiskLookupAPI = async (url) => {
-  const urlObj = new URL(url);
-  urlObj.search = "";
-
-  const response = await fetch(
-    `https://webrisk.googleapis.com/v1/uris:search?threatTypes=SOCIAL_ENGINEERING&threatTypes=MALWARE&uri=${urlObj.href}&key=` +
-      process.env.GOOGLE_API_KEY
-  );
-
-  if (!response.ok) {
-    googleWebRiskLookupAPIErrorLog(response.status);
-  }
-
-  const data = await response.json();
-  googleWebRiskLookupAPILog(JSON.stringify(data));
-
-  if (Object.keys(data).length == 0) {
-    // no data returned from web risk lookup
-    googleWebRiskLookupAPINoResultsLog();
-  } else {
-    googleWebRiskLookupAPIFlag(data["threat"]["threatTypes"].toString());
+    safeBrowsingPostScore();
   }
 };
