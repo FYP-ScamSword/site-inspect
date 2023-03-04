@@ -17,6 +17,11 @@ subdomainLenFlagScore = 1.5;
 homographsquattingFlagScore = 3.0;
 entropyFlagScore = 2.0;
 
+// blacklist keywords
+blacklistLow = 0.5;
+blacklistMedium = 1.0;
+blacklistHigh = 1.5;
+
 flagScore = (score) => {
   if (parentPort) parentPort.postMessage(["flagScore", score]);
 };
@@ -66,4 +71,10 @@ exports.homographsquattingPostScore = (homoglyphsFound) => {
 
 exports.entropyPostScore = (entropyScore) => {
   flagScore((entropyScore / 10) * entropyFlagScore);
+};
+
+exports.blacklistKeywordPostScore = (blacklistedKeyword) => {
+  if (blacklistedKeyword.flag_rating == "low") flagScore(blacklistLow);
+  else if (blacklistedKeyword.flag_rating == "medium") flagScore(blacklistMedium);
+  else if (blacklistedKeyword.flag_rating == "high") flagScore(blacklistHigh);
 };

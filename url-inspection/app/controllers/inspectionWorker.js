@@ -34,7 +34,7 @@ const {
   blacklistedKeywordFlag,
 } = require("./logging.controller");
 const { calculateRelativeEntropy } = require("./entropy");
-const { entropyPostScore, subdomainLenPostScore, registrationPeriodPostScore, domainAgePostScore } = require("./flagScores.controller");
+const { entropyPostScore, subdomainLenPostScore, registrationPeriodPostScore, domainAgePostScore, blacklistKeywordPostScore } = require("./flagScores.controller");
 
 db.mongoose
   .set("strictQuery", true)
@@ -266,12 +266,13 @@ checkSubdStrLength = async (url) => {
 
 checkKeywordBlacklist = async (url) => {
   var blacklist = await KeywordBlacklist.find({});
-  blacklist = blacklist.map((record) => record.blacklist_keyword);
+  blacklistKeywords = blacklist.map((record) => record.blacklist_keyword);
 
-  for (let i = 0; i < blacklist.length; i++) {
-    blacklistedKeywordLog(checkKeywordBlacklist.name, blacklist[i]);
-    if (url.includes(blacklist[i])) {
-      blacklistedKeywordFlag(blacklist[i]);
+  for (let i = 0; i < blacklistKeywords.length; i++) {
+    blacklistedKeywordLog(checkKeywordBlacklist.name, blacklistKeywords[i]);
+    if (url.includes(blacklistKeywords[i])) {
+      blacklistedKeywordFlag(blacklistKeywords[i]);
+      blacklistKeywordPostScore(blacklist[i]);
     }
   }
 };
