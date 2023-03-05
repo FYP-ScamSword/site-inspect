@@ -35,3 +35,9 @@ functions:
     - httpApi:
         path: /sendEmail
         method: post
+  sendEmailTemplate:
+    handler: src/handler.sendEmailTemplate
+    events:
+    - httpApi:
+        path: /sendEmailTemplate
+        method: post

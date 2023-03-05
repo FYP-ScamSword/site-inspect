@@ -61,11 +61,11 @@ export const sendEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxy
 }
 
 /**
- * Send a templated email
+ * Send a templated email. For API documentation, refer to https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html#sendTemplatedEmail-property
  * @param event
  * @returns status code and message
  */
-export const sendTemplatedEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+export const sendEmailTemplate = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   var data = JSON.parse(event.body);
 
   console.log(`Data received ${JSON.stringify(data)}`);
@@ -73,8 +73,8 @@ export const sendTemplatedEmail = async (event: APIGatewayEvent): Promise<APIGat
   const params = {
     Source: data.Source,
     Destination: data.Destination,
-    Template: data.template,
-    TemplateData: JSON.stringify(data.templateData),
+    Template: data.Template,
+    TemplateData: JSON.stringify(data.TemplateData)
   }
 
   try {
