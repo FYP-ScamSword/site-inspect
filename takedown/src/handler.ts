@@ -4,7 +4,7 @@ import AWS from 'aws-sdk';
 /**
  * Health check endpoint
  * @param event
- * @returns
+ * @returns status code 200, current timestamp, and API call details
  */
 export const health = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   return {
@@ -18,9 +18,9 @@ export const health = async (event: APIGatewayEvent): Promise<APIGatewayProxyRes
 }
 
 /**
- *
+ * Send an email with HTML content. For API documentation, refer to https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html#sendEmail-property
  * @param event
- * @returns
+ * @returns status code and message
  */
 export const sendEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   var data = JSON.parse(event.body);
@@ -28,58 +28,20 @@ export const sendEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxy
   console.log(`Data received ${JSON.stringify(data)}`);
   const ses = new AWS.SES();
   const params = {
-    Source: data.sender,
-    Destination: {
-      ToAddresses: [data.receiver],
-    },
+    Source: data.Source,
+    Destination: data.Destination,
     Message: {
       Body: {
-        Text: {
-          Data: data.message,
+        Html: {
+          Charset: 'UTF-8',
+          Data: data.Message,
         }
       },
       Subject: {
-        Data: data.subject,
+        Charset: 'UTF-8',
+        Data: data.Subject,
       }
-    },
-  }
-
-  try {
-    const result = await ses.sendEmail(params).promise();
-    console.log(result);
-    return {
-      statusCode: 200,
-      body: 'Email sent successfully',
     }
-  } catch (error) {
-    console.log(error);
-    return {
-      statusCode: 500,
-      body: `Error sending email: ${error}`,
-    }
-  }
-}
-
-export const sendRawEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  var data = JSON.parse(event.body);
-
-  console.log(`Data received ${JSON.stringify(data)}`);
-  const ses = new AWS.SES();
-  const params = {
-    Source: data.sender,
-    Destination: {
-      ToAddresses: [data.receiver],
-    },
-    Message: {
-      Body: {
-        Text: {
-          Data: data.message,
-        }
-      },
-      Subject: {
-        Data: data.subject,
-      }
-    },
   }
 
   try {
@@ -101,7 +63,7 @@ export const sendRawEmail = async (event: APIGatewayEvent): Promise<APIGatewayPr
 /**
  * Send a templated email
  * @param event
- * @returns
+ * @returns status code and message
  */
 export const sendTemplatedEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   var data = JSON.parse(event.body);
@@ -109,10 +71,8 @@ export const sendTemplatedEmail = async (event: APIGatewayEvent): Promise<APIGat
   console.log(`Data received ${JSON.stringify(data)}`);
   const ses = new AWS.SES();
   const params = {
-    Source: data.sender,
-    Destination: {
-      ToAddresses: [data.receiver],
-    },
+    Source: data.Source,
+    Destination: data.Destination,
     Template: data.template,
     TemplateData: JSON.stringify(data.templateData),
   }
