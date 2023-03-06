@@ -1,97 +1,145 @@
 [{
-  "blacklist_keyword": "account"
+  "blacklist_keyword": "account",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "alert"
+  "blacklist_keyword": "alert",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "bank"
+  "blacklist_keyword": "bank",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "bill"
+  "blacklist_keyword": "bill",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "covid"
+  "blacklist_keyword": "covid",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "credential"
+  "blacklist_keyword": "credential",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "customer"
+  "blacklist_keyword": "customer",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "noreply"
+  "blacklist_keyword": "noreply",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "invoice"
+  "blacklist_keyword": "invoice",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "help"
+  "blacklist_keyword": "help",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "login"
+  "blacklist_keyword": "login",
+  "flag_rating": "low"
 },{
-  "blacklist_keyword": "password"
+  "blacklist_keyword": "password",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "security"
+  "blacklist_keyword": "security",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "sign-in"
+  "blacklist_keyword": "sign-in",
+  "flag_rating": "low"
 },{
-  "blacklist_keyword": "signin"
+  "blacklist_keyword": "signin",
+  "flag_rating": "low"
 },{
-  "blacklist_keyword": "support"
+  "blacklist_keyword": "support",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "update"
+  "blacklist_keyword": "update",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "installment"
+  "blacklist_keyword": "installment",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "bet"
+  "blacklist_keyword": "bet",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "mailer"
+  "blacklist_keyword": "mailer",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "online"
+  "blacklist_keyword": "online",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "healthcare"
+  "blacklist_keyword": "healthcare",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "promo"
+  "blacklist_keyword": "promo",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "roulette"
+  "blacklist_keyword": "roulette",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "secure"
+  "blacklist_keyword": "secure",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "credit"
+  "blacklist_keyword": "credit",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "services"
+  "blacklist_keyword": "services",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "xbox360"
+  "blacklist_keyword": "xbox360",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "service"
+  "blacklist_keyword": "service",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "admin"
+  "blacklist_keyword": "admin",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "money"
+  "blacklist_keyword": "money",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "mail"
+  "blacklist_keyword": "mail",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "offer"
+  "blacklist_keyword": "offer",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "sexy"
+  "blacklist_keyword": "sexy",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "lottery"
+  "blacklist_keyword": "lottery",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "poker"
+  "blacklist_keyword": "poker",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "dollar"
+  "blacklist_keyword": "dollar",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "deal"
+  "blacklist_keyword": "deal",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "vacation"
+  "blacklist_keyword": "vacation",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "promotion"
+  "blacklist_keyword": "promotion",
+  "flag_rating": "medium"
 },{
-  "blacklist_keyword": "promocion"
+  "blacklist_keyword": "promocion",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "habbo"
+  "blacklist_keyword": "habbo",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "bonus"
+  "blacklist_keyword": "bonus",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "static"
+  "blacklist_keyword": "static",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "test"
+  "blacklist_keyword": "test",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "confirm"
+  "blacklist_keyword": "confirm",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "deposit"
+  "blacklist_keyword": "deposit",
+  "flag_rating": "high"
 },{
-  "blacklist_keyword": "debit"
+  "blacklist_keyword": "debit",
+  "flag_rating": "high"
 }]
