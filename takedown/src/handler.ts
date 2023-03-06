@@ -1,6 +1,11 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
 
+/**
+ * Health check endpoint
+ * @param event
+ * @returns status code 200, current timestamp, and API call details
+ */
 export const health = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   return {
     statusCode: 200,
@@ -12,26 +17,31 @@ export const health = async (event: APIGatewayEvent): Promise<APIGatewayProxyRes
   };
 }
 
+/**
+ * Send an email with HTML content. For API documentation, refer to https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html#sendEmail-property
+ * @param event
+ * @returns status code and message
+ */
 export const sendEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   var data = JSON.parse(event.body);
 
   console.log(`Data received ${JSON.stringify(data)}`);
   const ses = new AWS.SES();
   const params = {
-    Source: data.sender,
-    Destination: {
-      ToAddresses: [data.receiver],
-    },
+    Source: data.Source,
+    Destination: data.Destination,
     Message: {
       Body: {
-        Text: {
-          Data: data.message,
+        Html: {
+          Charset: 'UTF-8',
+          Data: data.Message,
         }
       },
       Subject: {
-        Data: data.subject,
+        Charset: 'UTF-8',
+        Data: data.Subject,
       }
-    },
+    }
   }
 
   try {
@@ -48,5 +58,37 @@ export const sendEmail = async (event: APIGatewayEvent): Promise<APIGatewayProxy
       body: `Error sending email: ${error}`,
     }
   }
+}
 
+/**
+ * Send a templated email. For API documentation, refer to https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html#sendTemplatedEmail-property
+ * @param event
+ * @returns status code and message
+ */
+export const sendEmailTemplate = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+  var data = JSON.parse(event.body);
+
+  console.log(`Data received ${JSON.stringify(data)}`);
+  const ses = new AWS.SES();
+  const params = {
+    Source: data.Source,
+    Destination: data.Destination,
+    Template: data.Template,
+    TemplateData: JSON.stringify(data.TemplateData)
+  }
+
+  try {
+    const result = await ses.sendTemplatedEmail(params).promise();
+    console.log(result);
+    return {
+      statusCode: 200,
+      body: 'Email sent successfully',
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: `Error sending email: ${error}`,
+    }
+  }
 }
