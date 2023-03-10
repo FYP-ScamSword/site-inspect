@@ -33,6 +33,7 @@ const {
   abnormalStringLenFlag,
   blacklistedKeywordLog,
   blacklistedKeywordFlag,
+  urlPreviouslyInspectedLog,
 } = require("./logging.controller");
 const { entropy } = require("./stringSimilarity");
 const { calculateRelativeEntropy } = require("./entropy");
@@ -53,8 +54,23 @@ db.mongoose
   });
 
 startLinkInspection = async (url, inspectedLink) => {
-  const inspectLinkObj = await new InspectLinks(inspectedLink).save(); // add new entry to DB with status "processing"
-  inspectedLink._id = inspectLinkObj["_id"];
+
+  var inspectLinkObj = null;
+  var urlPreviouslyInspected = false;
+
+  inspectLinkObj = await InspectLinks.findOne({ "original_url": url });
+
+  if (inspectLinkObj != null) {
+    urlPreviouslyInspected = true;
+    inspectedLink._id = inspectLinkObj["_id"];
+    inspectedLink.to_flag = inspectLinkObj["to_flag"];
+    inspectLinkObj = await InspectLinks.findOneAndUpdate({ "original_url": url }, inspectedLink);
+  } else {
+    inspectLinkObj = await new InspectLinks(inspectedLink).save(); // add new entry to DB with status "processing"
+    inspectedLink._id = inspectLinkObj["_id"];
+  }
+
+  urlPreviouslyInspectedLog(urlPreviouslyInspected);
 
   /* ----------------------------- Processing URL ----------------------------- */
   url = await processingUrl(url);
