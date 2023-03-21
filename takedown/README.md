@@ -2,34 +2,66 @@
 
 A set of serverless functions that enable simplified takedown requests to DNS registrars and web hosting providers. This project is built with [Serverless](https://www.serverless.com/)
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
-
 ## Usage
 
-- Set up [serverless](https://www.serverless.com/framework/docs/getting-started) and AWS credentials for deployment
+- Set up [serverless](https://www.serverless.com/framework/docs/getting-started) and [AWS CLI credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for deployment
+- Add [verified identities](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html) for sending and receiving emails through AWS SES
+- Install project dependencies with `npm i`
 
-- Install project dependencies:
+#### Local deployment
 
-```bash
-npm i
+- You can test the API locally using `serverless offline`
+
+```
+sls offline
 ```
 
-- Deploy!
+You should see something similar to the following output:
+
+```
+Starting Offline at stage dev (us-east-1)
+
+Offline [http for lambda] listening on http://localhost:3002
+Function names exposed for local invocation by aws-sdk:
+           * health: takedown-dev-health
+           * sendEmail: takedown-dev-sendEmail
+           * sendEmailTemplate: takedown-dev-sendEmailTemplate
+
+   ┌─────────────────────────────────────────────────────────────────────────────────────┐
+   │                                                                                     │
+   │   GET  | http://localhost:3000/health                                               │
+   │   POST | http://localhost:3000/2015-03-31/functions/health/invocations              │
+   │   POST | http://localhost:3000/sendEmail                                            │
+   │   POST | http://localhost:3000/2015-03-31/functions/sendEmail/invocations           │
+   │   POST | http://localhost:3000/sendEmailTemplate                                    │
+   │   POST | http://localhost:3000/2015-03-31/functions/sendEmailTemplate/invocations   │
+   │                                                                                     │
+   └─────────────────────────────────────────────────────────────────────────────────────┘
+
+Server ready: http://localhost:3000 🚀
+```
+
+#### Cloud deployment
+
+- Deploy the API to AWS lambda with the following command:
 
 ```
 $ sls deploy
 ```
 
-After deploying, you should see output similar to:
+After deploying, you should something similar to the following output:
 
 ```bash
-Deploying aws-node-http-api-project to stage dev (us-east-1)
+✔ Service deployed to stack takedown-dev (173s)
 
-✔ Service deployed to stack aws-node-http-api-project-dev (152s)
-
-endpoint: GET - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/
+endpoints:
+  GET - https://sqbbvuce96.execute-api.us-east-1.amazonaws.com/health
+  POST - https://sqbbvuce96.execute-api.us-east-1.amazonaws.com/sendEmail
+  POST - https://sqbbvuce96.execute-api.us-east-1.amazonaws.com/sendEmailTemplate
 functions:
-  hello: aws-node-http-api-project-dev-hello (1.9 kB)
+  health: takedown-dev-health (31 MB)
+  sendEmail: takedown-dev-sendEmail (31 MB)
+  sendEmailTemplate: takedown-dev-sendEmailTemplate (31 MB)
 ```
 
 _Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [http event docs](https://www.serverless.com/framework/docs/providers/aws/events/apigateway/).
