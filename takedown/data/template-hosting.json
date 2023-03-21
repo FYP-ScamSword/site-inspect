@@ -1,0 +1,8 @@
+{
+  "Template": {
+    "TemplateName": "template-hosting",
+    "SubjectPart": "Hosting takedown request for {{ip}}",
+    "HtmlPart": "<p>To Whom It May Concern,</p><p>Based on an internal investigation, our organization has found that the service at {{ip}} is likely to be hosting a phishing site being used for malicious purposes.</p><p>Here is a brief write-up and supporting evidence:<br>{{evidence}}</p><p>Our organization has a zero tolerance policy for phishing sites and we would like to request that you take down the site immediately.</p><p>Feel free to contact us at {{contact}} to follow-up.</p><p>Best Regards,<br>Open Government Products</p>",
+    "TextPart": "To Whom It May Concern,\r\n\r\nBased on an internal investigation, our organization has found that the service{{ip}} is likely to be hosting a phishing site being used for malicious purposes.\r\n\r\nHere is a brief write-up and supporting evidence:\r\n{{evidence}}\r\n\r\nWe have a zero tolerance policy for phishing sites and we would like to request that you take down the site immediately.\r\n\r\nFeel free to contact us at {{contact}} to follow-up.\r\n\r\nBest Regards,\r\nOpen Government Products"
+  }
+}
