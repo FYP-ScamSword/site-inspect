@@ -6,7 +6,13 @@ import requests
 import boto3
 from selenium import webdriver
 from fastapi import BackgroundTasks
+from dotenv import load_dotenv
 
+cwd = os.getcwd()
+
+# Specify the path to the .env file relative to the current working directory
+dotenv_path = os.path.join(cwd, '.env')
+load_dotenv(dotenv_path)
 s3 = boto3.client('s3',
                   aws_access_key_id=os.environ.get("AWS_PUBLIC_KEY"),
                   aws_secret_access_key=os.environ.get("AWS_SECRET_KEY"),

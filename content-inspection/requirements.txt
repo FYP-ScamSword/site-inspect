@@ -10,3 +10,5 @@ numpy==1.19.5
 opencv-python-headless==4.5.4.58
 pytest
 Pillow
+pymongo==3.11.4
+python-dotenv==1.0.0
