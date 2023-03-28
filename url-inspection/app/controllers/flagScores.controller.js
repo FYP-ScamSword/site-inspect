@@ -14,7 +14,7 @@ const levenshteinDistanceFlagScore = 1.0;
 const registrationPeriodFlagScore = 1.5;
 const redirectionsFlagScore = 1.5;
 const subdomainLenFlagScore = 1.5;
-const homographsquattingFlagScore = 3.0;
+const homographsquattingFlagScore = 2.5;
 const entropyFlagScore = 2.0;
 
 // blacklist keywords
@@ -67,7 +67,8 @@ exports.subdomainLenPostScore = (string) => {
 };
 
 exports.homographsquattingPostScore = (homoglyphsFound) => {
-  flagScore((Math.min(homoglyphsFound.length, 10) / 10) * homographsquattingFlagScore);
+  //need to fix
+  flagScore(homographsquattingFlagScore);
 };
 
 exports.entropyPostScore = (entropyScore) => {
@@ -83,5 +84,5 @@ exports.blacklistKeywordPostScore = (blacklistedKeywords) => {
     else if (blacklistedKeywords[i].flag_rating == "high") score += blacklistHigh;
   }
 
-  return blacklistFlagScore - (1 / (score * 5));
+  return blacklistFlagScore - (1 / (score * 3));
 };
