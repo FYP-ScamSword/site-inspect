@@ -9,7 +9,7 @@ provider:
   name: aws
   runtime: nodejs16.x
   stage: dev
-  region: ap-southeast-1
+  region: us-east-1
   httpApi:
     cors: true
   iam:
@@ -19,6 +19,7 @@ provider:
         Action:
         - ses:SendEmail
         - ses:SendRawEmail
+        - ses:SendTemplatedEmail
         Resource:
         - arn:aws:ses:*
 
@@ -34,4 +35,10 @@ functions:
     events:
     - httpApi:
         path: /sendEmail
+        method: post
+  sendEmailTemplate:
+    handler: src/handler.sendEmailTemplate
+    events:
+    - httpApi:
+        path: /sendEmailTemplate
         method: post

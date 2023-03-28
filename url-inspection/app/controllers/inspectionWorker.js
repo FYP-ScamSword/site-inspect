@@ -32,6 +32,7 @@ const {
   abnormalStringLenFlag,
   blacklistedKeywordLog,
   blacklistedKeywordFlag,
+  urlPreviouslyInspectedLog,
 } = require("./logging.controller");
 const { calculateRelativeEntropy } = require("./entropy");
 const { entropyPostScore, subdomainLenPostScore, registrationPeriodPostScore, domainAgePostScore, blacklistKeywordPostScore } = require("./flagScores.controller");
@@ -52,8 +53,23 @@ db.mongoose
   });
 
 startLinkInspection = async (url, inspectedLink) => {
-  const inspectLinkObj = await new InspectLinks(inspectedLink).save(); // add new entry to DB with status "processing"
-  inspectedLink._id = inspectLinkObj["_id"];
+
+  var inspectLinkObj = null;
+  var urlPreviouslyInspected = false;
+
+  inspectLinkObj = await InspectLinks.findOne({ "original_url": url });
+
+  if (inspectLinkObj != null) {
+    urlPreviouslyInspected = true;
+    inspectedLink._id = inspectLinkObj["_id"];
+    inspectedLink.to_flag = inspectLinkObj["to_flag"];
+    inspectLinkObj = await InspectLinks.findOneAndUpdate({ "original_url": url }, inspectedLink);
+  } else {
+    inspectLinkObj = await new InspectLinks(inspectedLink).save(); // add new entry to DB with status "processing"
+    inspectedLink._id = inspectLinkObj["_id"];
+  }
+
+  urlPreviouslyInspectedLog(urlPreviouslyInspected);
 
   /* ----------------------------- Processing URL ----------------------------- */
   url = await processingUrl(url);
@@ -78,7 +94,7 @@ startLinkInspection = async (url, inspectedLink) => {
   /* ------------------- Inspecting Link for Cybersquatting ------------------- */
   let cyberSquattingDetected = await checkCybersquatting(url);
 
-  if (!cyberSquattingDetected) inspectedLink.to_flag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
+  if (cyberSquattingDetected == false) inspectedLink.to_flag = false; // means this is a legitimate domain that is kept as a record in our DB, both the SLD and TLD matches hence it is legitimate
 
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
   await entropyDGADetection(url);

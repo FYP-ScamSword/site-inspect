@@ -1,0 +1,8 @@
+{
+  "Template": {
+    "TemplateName": "template-demo",
+    "SubjectPart": "Takedown request for {{url}}",
+    "HtmlPart": "<p>Hello {{name}},</p><p>We have found a suspicious site at the following URL: {{url}}.</p>",
+    "TextPart": "Hello {{name}},\r\nWe have found a suspicious site at the following URL: {{url}}."
+  }
+}
