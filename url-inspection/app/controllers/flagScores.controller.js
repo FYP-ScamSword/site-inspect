@@ -8,8 +8,8 @@ const safeBrowsingFlagScore = 2.0;
 //typobitsquatting scenario 1: jarowinkler > 0.9
 const jaroWinklerOnlyFlagScore = 2.0;
 // typobitsquatting scenario 2: jaro winkler > 0.75 && levenshtein < threshold
-const jaroWinklerPartialFlagScore = 1.5;
-const levenshteinDistanceFlagScore = 0.5;
+const jaroWinklerPartialFlagScore = 1.0;
+const levenshteinDistanceFlagScore = 1.0;
 
 const registrationPeriodFlagScore = 1.5;
 const redirectionsFlagScore = 1.5;
@@ -28,7 +28,7 @@ const flagScore = (score) => {
 };
 
 exports.comboLevelSquattingPostScore = (flags) => {
-  flagScore(comboLevelsquattingFlagScore * (flags.split(" ").length - 1));
+  flagScore(comboLevelsquattingFlagScore);
 };
 
 exports.domainAgePostScore = () => {
@@ -50,7 +50,7 @@ exports.typoBitsquattingCaseTwoPostScore = (
 ) => {
   flagScore(
     jaroWinklerPartialFlagScore * jaroWinkerScore +
-    levenshteinDistanceFlagScore * (string.length / levenshteinScore)
+    levenshteinDistanceFlagScore - (levenshteinScore / 10)
   );
 };
 
