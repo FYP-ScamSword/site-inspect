@@ -268,13 +268,17 @@ checkKeywordBlacklist = async (url) => {
   var blacklist = await KeywordBlacklist.find({});
   blacklistKeywords = blacklist.map((record) => record.blacklist_keyword);
 
+  let foundBlacklistedKeywords = [];
+
   for (let i = 0; i < blacklistKeywords.length; i++) {
     blacklistedKeywordLog(checkKeywordBlacklist.name, blacklistKeywords[i]);
     if (url.includes(blacklistKeywords[i])) {
+      foundBlacklistedKeywords.push(blacklist[i]);
       blacklistedKeywordFlag(blacklistKeywords[i]);
-      blacklistKeywordPostScore(blacklist[i]);
     }
   }
+
+  if (foundBlacklistedKeywords.length != 0) blacklistKeywordPostScore(foundBlacklistedKeywords);
 };
 
 /* -------------------------------------------------------------------------- */

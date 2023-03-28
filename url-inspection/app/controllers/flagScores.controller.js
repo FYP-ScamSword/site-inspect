@@ -18,6 +18,7 @@ const homographsquattingFlagScore = 3.0;
 const entropyFlagScore = 2.0;
 
 // blacklist keywords
+const blacklistFlagScore = 2.0;
 const blacklistLow = 0.5;
 const blacklistMedium = 1.0;
 const blacklistHigh = 1.5;
@@ -73,8 +74,14 @@ exports.entropyPostScore = (entropyScore) => {
   flagScore((Math.min(entropyScore, 10) / 10) * entropyFlagScore);
 };
 
-exports.blacklistKeywordPostScore = (blacklistedKeyword) => {
-  if (blacklistedKeyword.flag_rating == "low") flagScore(blacklistLow);
-  else if (blacklistedKeyword.flag_rating == "medium") flagScore(blacklistMedium);
-  else if (blacklistedKeyword.flag_rating == "high") flagScore(blacklistHigh);
+exports.blacklistKeywordPostScore = (blacklistedKeywords) => {
+  var score = 0.0;
+
+  for (var i = 0; i < blacklistedKeywords.length; i++) {
+    if (blacklistedKeywords[i].flag_rating == "low") score += blacklistLow;
+    else if (blacklistedKeywords[i].flag_rating == "medium") score += blacklistMedium;
+    else if (blacklistedKeywords[i].flag_rating == "high") score += blacklistHigh;
+  }
+
+  return blacklistFlagScore - (1 / (score * 5));
 };
