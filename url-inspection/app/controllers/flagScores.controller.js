@@ -1,7 +1,7 @@
 const { parentPort, workerData } = require("worker_threads");
 
 // Base scores
-const comboLevelsquattingFlagScore = 2.0;
+const comboLevelsquattingFlagScore = 2.5;
 const domainAgeFlagScore = 2.0;
 const safeBrowsingFlagScore = 2.0;
 
