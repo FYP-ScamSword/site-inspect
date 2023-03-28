@@ -1,6 +1,8 @@
 const { probabilities } = require("./entropy.probabilities");
 
 exports.calculateRelativeEntropy = (stringToCheck) => {
+  if (stringToCheck.length < 5) return;
+
   let entropyScore = 0.0;
 
   let charFrequencies = [...stringToCheck].reduce(
