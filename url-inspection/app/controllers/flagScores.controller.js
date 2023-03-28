@@ -1,28 +1,28 @@
 const { parentPort, workerData } = require("worker_threads");
 
 // Base scores
-comboLevelsquattingFlagScore = 2.0;
-domainAgeFlagScore = 2.0;
-safeBrowsingFlagScore = 2.0;
+const comboLevelsquattingFlagScore = 2.0;
+const domainAgeFlagScore = 2.0;
+const safeBrowsingFlagScore = 2.0;
 
 //typobitsquatting scenario 1: jarowinkler > 0.9
-jaroWinklerOnlyFlagScore = 2.0;
+const jaroWinklerOnlyFlagScore = 2.0;
 // typobitsquatting scenario 2: jaro winkler > 0.75 && levenshtein < threshold
-jaroWinklerPartialFlagScore = 1.5;
-levenshteinDistanceFlagScore = 0.5;
+const jaroWinklerPartialFlagScore = 1.5;
+const levenshteinDistanceFlagScore = 0.5;
 
-registrationPeriodFlagScore = 1.5;
-redirectionsFlagScore = 1.5;
-subdomainLenFlagScore = 1.5;
-homographsquattingFlagScore = 3.0;
-entropyFlagScore = 2.0;
+const registrationPeriodFlagScore = 1.5;
+const redirectionsFlagScore = 1.5;
+const subdomainLenFlagScore = 1.5;
+const homographsquattingFlagScore = 3.0;
+const entropyFlagScore = 2.0;
 
 // blacklist keywords
-blacklistLow = 0.5;
-blacklistMedium = 1.0;
-blacklistHigh = 1.5;
+const blacklistLow = 0.5;
+const blacklistMedium = 1.0;
+const blacklistHigh = 1.5;
 
-flagScore = (score) => {
+const flagScore = (score) => {
   if (parentPort) parentPort.postMessage(["flagScore", score]);
 };
 
@@ -49,7 +49,7 @@ exports.typoBitsquattingCaseTwoPostScore = (
 ) => {
   flagScore(
     jaroWinklerPartialFlagScore * jaroWinkerScore +
-      levenshteinDistanceFlagScore * (string.length / levenshteinScore)
+    levenshteinDistanceFlagScore * (string.length / levenshteinScore)
   );
 };
 
@@ -58,19 +58,19 @@ exports.registrationPeriodPostScore = () => {
 };
 
 exports.redirectionsPostScore = (numRedirections) => {
-  flagScore(redirectionsFlagScore - 1 / numRedirections);
+  flagScore(redirectionsFlagScore - (1 / numRedirections));
 };
 
 exports.subdomainLenPostScore = (string) => {
-  flagScore(subdomainLenFlagScore - 1 / (string.length - 15 + 1));
+  flagScore(subdomainLenFlagScore - (1 / (string.length - 15 + 1)));
 };
 
 exports.homographsquattingPostScore = (homoglyphsFound) => {
-  flagScore((homoglyphsFound.length / 10) * homographsquattingFlagScore);
+  flagScore((Math.min(homoglyphsFound.length, 10) / 10) * homographsquattingFlagScore);
 };
 
 exports.entropyPostScore = (entropyScore) => {
-  flagScore((entropyScore / 10) * entropyFlagScore);
+  flagScore((Math.min(entropyScore, 10) / 10) * entropyFlagScore);
 };
 
 exports.blacklistKeywordPostScore = (blacklistedKeyword) => {
