@@ -83,5 +83,5 @@ exports.blacklistKeywordPostScore = (blacklistedKeywords) => {
     else if (blacklistedKeywords[i].flag_rating == "high") score += blacklistHigh;
   }
 
-  return blacklistFlagScore - (1 / (score * 5));
+  flagScore(blacklistFlagScore - (1 / (score * 5)));
 };
