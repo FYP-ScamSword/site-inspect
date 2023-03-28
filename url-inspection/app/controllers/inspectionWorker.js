@@ -5,7 +5,6 @@ const {
   unshortenUrl,
   whoisLookup,
   googleSafeLookupAPI,
-  googleWebRiskLookupAPI,
 } = require("./inspection.controller");
 const db = require("../models");
 const InspectLinks = db.inspected_links;
@@ -85,9 +84,6 @@ startLinkInspection = async (url, inspectedLink) => {
 
   /* ------------ Check URL using Google's Safe Browsing Lookup API ----------- */
   await googleSafeLookupAPI(url);
-
-  /* -------------- Check URL using Google's Web Risk Lookup API -------------- */
-  await googleWebRiskLookupAPI(url);
 
   /* ---------------------- Check subdomain string length --------------------- */
   await checkSubdStrLength(url);
