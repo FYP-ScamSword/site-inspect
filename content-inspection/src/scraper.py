@@ -9,6 +9,7 @@ from .scrape.form_checker import form_checker
 from .scrape.xss_checker import xss_checker
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from datetime import datetime
 
 cwd = os.getcwd()
 
@@ -45,8 +46,9 @@ async def scrape_website(url: str) -> Dict[str, List[str]]:
         'html': soup.prettify(),
         'suspicious_inputs': form_checker(soup),
         'xss_attempts': xss_checker(soup),
-        'similar_favicon': favicon_checker(soup, url),
+        'similar_favicon': favicon_checker(url),
         'alive': True,
+        'updated_at': datetime.now()
     }
 
     # Insert or update scraped data in database
