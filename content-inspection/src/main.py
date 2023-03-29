@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import BackgroundTasks
-from .scrape.scraper import scrape_website
+from .scraper import scrape_website
 from .screenshot import take_screenshot
 
 app = FastAPI()
