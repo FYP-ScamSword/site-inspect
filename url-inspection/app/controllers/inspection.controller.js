@@ -8,14 +8,11 @@ const {
   googleSafeLookupAPIErrorLog,
   googleSafeLookupAPINoResultsLog,
   googleSafeLookupAPIFlag,
-  googleWebRiskLookupAPIErrorLog,
-  googleWebRiskLookupAPILog,
-  googleWebRiskLookupAPINoResultsLog,
-  googleWebRiskLookupAPIFlag,
   processingUrlCountRedirectsLog,
   processingUrlRedirectsLog,
-  abnormalNumRedirections,
+  abnormalNumRedirectionsFlag,
 } = require("./logging.controller");
+const { redirectionsPostScore, safeBrowsingPostScore } = require("./flagScores.controller");
 
 /* ------------------------- Checks if URL is valid ------------------------- */
 exports.checkIsUrl = (url) => {
@@ -32,7 +29,8 @@ exports.unshortenUrl = async (url) => {
     processingUrlCountRedirectsLog("unshortenUrl", numRedirections);
 
     if (numRedirections > 2) {
-      abnormalNumRedirections(numRedirections);
+      abnormalNumRedirectionsFlag(numRedirections);
+      redirectionsPostScore(numRedirections);
     }
 
     return urls[urls.length - 1];
@@ -100,5 +98,7 @@ exports.googleSafeLookupAPI = async (url) => {
         })
         .toString()
     );
+
+    safeBrowsingPostScore();
   }
 };

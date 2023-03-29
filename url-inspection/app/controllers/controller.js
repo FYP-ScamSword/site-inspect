@@ -43,6 +43,7 @@ exports.inspectLink = (req, res) => {
     to_flag: null,
     registration_period: null,
     num_flags: 0,
+    flag_score: 0.0,
   };
 
   var flags_array = {
@@ -58,6 +59,8 @@ exports.inspectLink = (req, res) => {
     typobitsquatting_flag: false,
     combolevelsquatting_flag: false,
   };
+
+  var flag_score = 0.0;
 
   /* -------------------------------------------------------------------------- */
   /*                             Create new log file                            */
@@ -91,6 +94,10 @@ exports.inspectLink = (req, res) => {
     } else if (message[0] == "termination") {
       inspectedLink = message[1];
       inspectedLink._id = ObjectId(inspectedLink._id);
+
+      reportStr = `Flag Score: ${flag_score}\n\n${reportStr}`;
+    } else if (message[0] == "flagScore") {
+      flag_score += message[1];
     }
   });
 
@@ -133,6 +140,7 @@ exports.inspectLink = (req, res) => {
               if (error) console.log(error);
               else {
                 record.report = data.Location;
+                record.flag_score = flag_score;
 
                 var flags = Object.keys(flags_array);
                 flags.forEach(function (flag) {

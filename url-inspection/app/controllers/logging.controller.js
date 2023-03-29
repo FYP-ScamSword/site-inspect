@@ -32,26 +32,6 @@ exports.googleSafeLookupAPIErrorLog = (error) => {
   logging(formatMessage("googleSafeLookupAPI", "HTTP Error Response", error));
 };
 
-exports.googleWebRiskLookupAPILog = (value) => {
-  logging(formatMessage("googleWebRiskLookupAPI", "data", value));
-};
-
-exports.googleWebRiskLookupAPINoResultsLog = () => {
-  logging(
-    formatMessage(
-      "googleWebRiskLookupAPI",
-      "",
-      "Google's Web Risk Lookup API returned no results."
-    )
-  );
-};
-
-exports.googleWebRiskLookupAPIErrorLog = (error) => {
-  logging(
-    formatMessage("googleWebRiskLookupAPI", "HTTP Error Response", error)
-  );
-};
-
 exports.processingUrlUnshortenLog = (methodName, value) => {
   logging(formatMessage(methodName, "unshortenedUrl", value));
 };
@@ -192,7 +172,7 @@ flagging = (message, flag_type) => {
   if (parentPort) parentPort.postMessage(["flag", message, flag_type]);
 };
 
-exports.abnormalNumRedirections = (numRedirections) => {
+exports.abnormalNumRedirectionsFlag = (numRedirections) => {
   flagging(
     `- The number of redirections is abnormal (> 2): ${numRedirections}`,
     "redirections_flag"
@@ -204,14 +184,6 @@ exports.googleSafeLookupAPIFlag = (flags) => {
     `- Flagged by Google's Safe Browsing Lookup API\n\
   ${flags}`,
     "safe_browsing_flag"
-  );
-};
-
-exports.googleWebRiskLookupAPIFlag = (flags) => {
-  flagging(
-    `- Flagged by Google's Web Risk Lookup API\n\
-  ${flags}`,
-    "web_risk_flag"
   );
 };
 
@@ -256,7 +228,7 @@ exports.homographsquattingFlag = (homoglyphs) => {
 
 exports.levelsquattingCombosquattingFlag = (trademarks) => {
   flagging(
-    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) { ${trademarks} } found`,
+    `- Levelsquatting/Combosquatting Detected\n\t- Direct usage of trademark(s) {${trademarks} } found`,
     "combolevelsquatting_flag"
   );
 };
