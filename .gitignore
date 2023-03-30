@@ -6,13 +6,13 @@ npm-debug.log
 package-lock.json
 *.png
 !image/URLINSPECTION/*.png
+!content-inspection/src/assets/data/*.png
 .env*
 .flaskenv*
 !.env.project
 !.env.vault
 url-inspection/**/*.txt
 __pycache__/
-!/web-crawler/src/assets/favicons/*
 .DS_Store
 # Ignore Terraform state files
 *.tfstate

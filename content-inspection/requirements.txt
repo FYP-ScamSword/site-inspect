@@ -1,3 +1,10 @@
+
+tensorflow==2.11.0 # or tensorflow-macos for mac
+keras==2.11.0
+protobuf==3.19.1
+tensorboard==2.11.0
+tensorflow-estimator==2.11.0
+scikit-learn==1.2.2
 beautifulsoup4==4.9.3
 httplib2==0.19.1
 boto3==1.18.44
@@ -6,9 +13,10 @@ requests==2.26.0
 fastapi
 uvicorn
 chromedriver-binary==79.0.3945.36
-numpy==1.19.5
+numpy
 opencv-python-headless==4.5.4.58
 pytest
 Pillow
 pymongo==3.11.4
 python-dotenv==1.0.0
+matplotlib
