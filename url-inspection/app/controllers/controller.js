@@ -141,6 +141,7 @@ exports.inspectLink = (req, res) => {
               else {
                 record.report = data.Location;
                 record.flag_score = flag_score;
+                record.status = "processed";
 
                 var flags = Object.keys(flags_array);
                 flags.forEach(function (flag) {
