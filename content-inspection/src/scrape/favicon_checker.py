@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from .image_similarity_checker import extract_features_for_k_cluster, find_similar_images
 import requests
 import io
-from PIL import Image
+from PIL import Image,ImageOps
 
 
 def favicon_checker(url: str) -> dict:
@@ -15,12 +15,11 @@ def favicon_checker(url: str) -> dict:
     try:
         # Download the favicon.ico file
         response = requests.get(favicon_url)
-        print(response)
-        # response.raise_for_status()
+        response.raise_for_status()
 
         # Convert the favicon.ico file to a 32x32 PNG image
         image = Image.open(io.BytesIO(response.content)).convert('RGB')
-        image = image.resize((32, 32))
+        image = ImageOps.fit(image, (32, 32), method=Image.LANCZOS)
 
         # Save the PNG image to a file
         image_path = parsed_url.netloc + '.png'
