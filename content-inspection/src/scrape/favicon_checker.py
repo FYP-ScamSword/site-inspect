@@ -18,8 +18,9 @@ def favicon_checker(url: str) -> dict:
         response.raise_for_status()
 
         # Convert the favicon.ico file to a 32x32 PNG image
-        image = Image.open(io.BytesIO(response.content)).convert('RGB')
-        image = ImageOps.fit(image, (32, 32), method=Image.LANCZOS)
+        image = Image.open(io.BytesIO(response.content))
+        # .convert('RGB')
+        # image = ImageOps.fit(image, (32, 32), method=Image.LANCZOS)
 
         # Save the PNG image to a file
         image_path = parsed_url.netloc + '.png'
