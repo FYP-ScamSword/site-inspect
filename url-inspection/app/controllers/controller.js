@@ -94,8 +94,6 @@ exports.inspectLink = (req, res) => {
     } else if (message[0] == "termination") {
       inspectedLink = message[1];
       inspectedLink._id = ObjectId(inspectedLink._id);
-
-      reportStr = `Flag Score: ${flag_score}\n\n${reportStr}`;
     } else if (message[0] == "flagScore") {
       flag_score += message[1];
     } else if (message[0] == "sendingId") {
