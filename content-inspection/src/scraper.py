@@ -10,6 +10,7 @@ from .scrape.xss_checker import xss_checker
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
+from http.client import HTTPException
 
 cwd = os.getcwd()
 
@@ -35,7 +36,7 @@ async def scrape_website(url: str) -> Dict[str, List[str]]:
             # Return result from database
             return collection.find_one({'url': url}, {'_id': 0})
         else:
-            return {"error": "Invalid URL"}
+            raise HTTPException(res.status_code, {"message": "Invalid URL"})
 
     # Parse HTML content using Beautiful Soup
     soup = BeautifulSoup(res.text, 'html.parser')
