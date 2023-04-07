@@ -69,6 +69,8 @@ startLinkInspection = async (url, inspectedLink) => {
     inspectedLink._id = inspectLinkObj["_id"];
   }
 
+  notifyParent(inspectedLink);
+
   urlPreviouslyInspectedLog(urlPreviouslyInspected);
 
   /* ----------------------------- Processing URL ----------------------------- */
@@ -98,8 +100,6 @@ startLinkInspection = async (url, inspectedLink) => {
 
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
   await entropyDGADetection(url);
-
-  inspectedLink.status = "processed";
 
   // Updating the record in DB with "processed" status as well as processedUrl, calculated domain age.
   await InspectLinks.findByIdAndUpdate(inspectedLink._id, inspectedLink, {
@@ -345,3 +345,8 @@ terminatingWorker = (inspectedLink) => {
   inspectedLink._id = inspectedLink._id.toString();
   parentPort.postMessage(["termination", inspectedLink]);
 };
+
+notifyParent = (inspectedLink) => {
+  inspectedLink._id = inspectedLink._id.toString();
+  parentPort.postMessage(["sendingId", inspectedLink]);
+}
