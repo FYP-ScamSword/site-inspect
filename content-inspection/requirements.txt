@@ -12,3 +12,4 @@ pytest
 Pillow
 pymongo==3.11.4
 python-dotenv==1.0.0
+dnspython
