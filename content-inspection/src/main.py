@@ -26,7 +26,7 @@ async def scrape(url: str):
 async def screenshot(url: str, background_tasks: BackgroundTasks):
     return await take_screenshot(url, background_tasks)
 
-@app.get("/health")
+@app.get("/")
 def health_check():
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
