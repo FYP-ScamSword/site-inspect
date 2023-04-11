@@ -14,7 +14,6 @@ fastapi
 uvicorn
 chromedriver-binary==79.0.3945.36
 numpy
-opencv-python-headless==4.5.4.58
 pytest
 Pillow
 pymongo==3.11.4
