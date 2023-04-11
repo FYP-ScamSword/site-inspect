@@ -101,14 +101,11 @@ startLinkInspection = async (url, inspectedLink) => {
   /* ----------- Entropy Check for Domain Generation Algorithm (DGA) ---------- */
   await entropyDGADetection(url);
 
-  // Updating the record in DB with "processed" status as well as processedUrl, calculated domain age.
-  await InspectLinks.findByIdAndUpdate(inspectedLink._id, inspectedLink, {
-    useFindAndModify: false,
-  });
-
   terminatingWorker(inspectedLink);
 
-  db.mongoose.disconnect();
+  db.mongoose.connection.close(function() {
+    process.exit();
+  });
 };
 
 processingUrl = async (url) => {

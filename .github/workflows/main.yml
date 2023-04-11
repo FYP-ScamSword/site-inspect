@@ -44,19 +44,51 @@ jobs:
     - name: Run integration test
       working-directory: url-inspection
       run: docker-compose -f ci/docker-compose.test.yml up --exit-code-from link-inspection-url-inspection-jest
+  # deploy-url-inspection:
+  #   needs: integration-test-url-inspection
+  #   if: github.ref == 'refs/heads/main'
+  #   name: Deploy app
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - uses: superfly/flyctl-actions/setup-flyctl@master
+  #   - name: flyctl deploy
+  #     working-directory: url-inspection
+  #     run: flyctl deploy --remote-only
   deploy-url-inspection:
     needs: integration-test-url-inspection
     if: github.ref == 'refs/heads/main'
     name: Deploy app
     runs-on: ubuntu-latest
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
-    - uses: actions/checkout@v3
-    - uses: superfly/flyctl-actions/setup-flyctl@master
-    - name: flyctl deploy
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+    - name: Build, tag, and push image to Amazon ECR
       working-directory: url-inspection
-      run: flyctl deploy --remote-only
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: url-inspection
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    - name: Force new deployment
+      run: |
+        aws ecs update-service --cluster site-inspection-cluster --service url-inspection-service --region ap-southeast-1 --force-new-deployment
   unit-test-content-inspection:
     needs: changes
     if: ${{ needs.changes.outputs.names == '["content-inspection"]' || needs.changes.outputs.names == '["url-inspection","content-inspection"]' }}
