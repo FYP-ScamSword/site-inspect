@@ -113,8 +113,8 @@ jobs:
         cd $GITHUB_WORKSPACE/content-inspection
         python -m pytest
   deploy-content-inspection:
-    #needs: unit-test-content-inspection
-    # if: github.ref == 'refs/heads/main'
+    needs: unit-test-content-inspection
+    if: github.ref == 'refs/heads/main'
     name: Deploy app
     runs-on: ubuntu-latest
     steps:
