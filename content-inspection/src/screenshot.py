@@ -30,6 +30,17 @@ async def take_screenshot(url: str, background_tasks: BackgroundTasks) -> Dict[s
 
     filename = urllib.parse.quote(url, safe='')+'.png'
 
+    # Check if the file already exists in the bucket
+    try:
+        s3.head_object(Bucket="scamsword-screenshots", Key=filename)
+        # If the file exists, return the URL to the file
+        s3_url = f'https://scamsword-screenshots.s3.amazonaws.com/{filename}'
+        print(f'Screenshot already exists at {s3_url}')
+        return {"filename": filename}
+    except:
+        # If the file doesn't exist, proceed with taking the screenshot and uploading it to S3
+        print('Screenshot not found in S3, taking new screenshot...')
+
     options = webdriver.ChromeOptions()
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')

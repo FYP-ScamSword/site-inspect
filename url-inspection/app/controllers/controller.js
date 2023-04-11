@@ -94,10 +94,10 @@ exports.inspectLink = (req, res) => {
     } else if (message[0] == "termination") {
       inspectedLink = message[1];
       inspectedLink._id = ObjectId(inspectedLink._id);
-
-      reportStr = `Flag Score: ${flag_score}\n\n${reportStr}`;
     } else if (message[0] == "flagScore") {
       flag_score += message[1];
+    } else if (message[0] == "sendingId") {
+      inspectedLink._id = ObjectId(message[1]._id);
     }
   });
 
@@ -141,6 +141,7 @@ exports.inspectLink = (req, res) => {
               else {
                 record.report = data.Location;
                 record.flag_score = flag_score;
+                record.status = "processed";
 
                 var flags = Object.keys(flags_array);
                 flags.forEach(function (flag) {
@@ -154,6 +155,17 @@ exports.inspectLink = (req, res) => {
           );
         }
       });
+    } else if (exitCode == 1) {
+      InspectLinks.findOne(
+        { _id: inspectedLink._id },
+        function (error, record) {
+          if (error) console.log(error);
+          else {
+            record.status = "error";
+            record.save();
+          }
+        }
+      );
     }
   });
 
