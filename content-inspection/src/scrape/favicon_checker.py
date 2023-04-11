@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from .image_similarity_checker import extract_features_for_k_cluster, find_similar_images
 import requests
 import io
-from PIL import Image,ImageOps
+from PIL import Image
 
 
 def favicon_checker(url: str) -> dict:

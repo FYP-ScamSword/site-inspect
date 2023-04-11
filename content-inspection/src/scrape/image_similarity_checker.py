@@ -3,11 +3,36 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
 from sklearn.neighbors import NearestNeighbors
+import boto3
+from dotenv import load_dotenv
 
+cwd = os.getcwd()
+
+# Specify the path to the .env file relative to the current working directory
+dotenv_path = os.path.join(cwd, '.env')
+load_dotenv(dotenv_path)
 # Load VGG16
 model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
 
+
+def download_all_from_s3(bucket_name, local_directory_path):
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+
+    for obj in bucket.objects.all():
+        # construct local path
+        local_path = os.path.join(local_directory_path, obj.key)
+
+        # create directory if it doesn't exist
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
+        # download object
+        bucket.download_file(obj.key, local_path)
+
+        print(f"Downloaded {obj.key} to {local_path}")
 # Import favicons
+
+
 def create_file_list(dir):
     file_list = []
     names = []
@@ -21,6 +46,7 @@ def create_file_list(dir):
 
 # load the original image
 cwd = os.getcwd()
+download_all_from_s3(os.environ.get('FAVICON_BUCKET'), cwd+'/src/assets/data')
 myFileList, names = create_file_list(cwd+'/src/assets/data')
 
 
@@ -41,6 +67,8 @@ for file in myFileList:
     features.append(feature2)
 
 # K-clustering model for top 5
+
+
 def find_similar_images(query_img_features, k=5):
     dataset_features = features
     dataset_features = np.vstack(dataset_features)
@@ -53,5 +81,6 @@ def find_similar_images(query_img_features, k=5):
     result = []
     for i in range(k):
         result.append({"name": names[indices[0][i]].split(
-            '.')[0], "distance": float(distances[0][i])})
+            '.')[0], "distance": float(distances[0][i]),
+            "url": os.environ.get('FAVICON_BUCKET_PREFIX')+names[indices[0][i]]})
     return result
