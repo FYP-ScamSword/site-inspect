@@ -57,17 +57,6 @@ jobs:
   #   - name: flyctl deploy
   #     working-directory: url-inspection
   #     run: flyctl deploy --remote-only
-  deploy-url-inspection-fly:
-    name: Deploy app
-    runs-on: ubuntu-latest
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-    steps:
-    - uses: actions/checkout@v3
-    - uses: superfly/flyctl-actions/setup-flyctl@master
-    - name: flyctl deploy
-      working-directory: url-inspection
-      run: flyctl deploy --remote-only
   deploy-url-inspection:
     needs: integration-test-url-inspection
     if: github.ref == 'refs/heads/main'
