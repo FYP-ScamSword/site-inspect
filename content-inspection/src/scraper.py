@@ -27,9 +27,39 @@ async def scrape_website(url: str) -> Dict[str, List[str]]:
     # Check if URL is reachable
     headers = {'User-Agent': 'Mozilla/5.0',
                'ngrok-skip-browser-warning': 'true'}
-    res = requests.get(url, headers=headers)
-    if res.status_code != 200:
-        # Check if URL exists in database
+
+    try:
+        res = requests.get(url, headers=headers)
+        if res.status_code != 200:
+            # Check if URL exists in database
+            if collection.find_one({'url': url}):
+                # Update 'alive' field to False
+                collection.update_one({'url': url}, {'$set': {'alive': False}})
+                # Return result from database
+                return collection.find_one({'url': url}, {'_id': 0})
+            else:
+                return {"error": "Invalid URL"}
+
+        # Parse HTML content using Beautiful Soup
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        # Create dictionary of scraped data
+        scraped_data = {
+            'url': url,
+            'html': soup.prettify(),
+            'suspicious_inputs': form_checker(soup),
+            'xss_attempts': xss_checker(soup),
+            'similar_favicon': favicon_checker(url),
+            'alive': True,
+            'updated_at': datetime.now()
+        }
+
+        # Insert or update scraped data in database
+        collection.update_one(
+            {'url': url}, {'$set': scraped_data}, upsert=True)
+
+        return scraped_data
+    except requests.exceptions.SSLError:
         if collection.find_one({'url': url}):
             # Update 'alive' field to False
             collection.update_one({'url': url}, {'$set': {'alive': False}})
@@ -37,22 +67,3 @@ async def scrape_website(url: str) -> Dict[str, List[str]]:
             return collection.find_one({'url': url}, {'_id': 0})
         else:
             raise HTTPException(res.status_code, {"message": "Invalid URL"})
-
-    # Parse HTML content using Beautiful Soup
-    soup = BeautifulSoup(res.text, 'html.parser')
-
-    # Create dictionary of scraped data
-    scraped_data = {
-        'url': url,
-        'html': soup.prettify(),
-        'suspicious_inputs': form_checker(soup),
-        'xss_attempts': xss_checker(soup),
-        'similar_favicon': favicon_checker(url),
-        'alive': True,
-        'updated_at': datetime.now()
-    }
-
-    # Insert or update scraped data in database
-    collection.update_one({'url': url}, {'$set': scraped_data}, upsert=True)
-
-    return scraped_data

@@ -16,7 +16,7 @@ load_dotenv(dotenv_path)
 s3 = boto3.client('s3',
                   aws_access_key_id=os.environ.get("AWS_PUBLIC_KEY"),
                   aws_secret_access_key=os.environ.get("AWS_SECRET_KEY"),
-                  region_name='us-east-1')
+                  region_name=os.environ.get("AWS_REGION"))
 
 
 async def delete_file_from_local(filename: str) -> None:
