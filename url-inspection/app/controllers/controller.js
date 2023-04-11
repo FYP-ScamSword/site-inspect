@@ -141,6 +141,8 @@ exports.inspectLink = (req, res) => {
               else {
                 record.report = data.Location;
                 record.flag_score = flag_score;
+                record.domain_age = inspectedLink.domain_age;
+                record.processed_url = inspectedLink.processed_url;
                 record.status = "processed";
 
                 var flags = Object.keys(flags_array);
