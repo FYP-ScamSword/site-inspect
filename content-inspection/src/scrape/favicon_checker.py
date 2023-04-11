@@ -3,6 +3,19 @@ from .image_similarity_checker import extract_features_for_k_cluster, find_simil
 import requests
 import io
 from PIL import Image
+import os
+import boto3
+from dotenv import load_dotenv
+
+cwd = os.getcwd()
+
+# Specify the path to the .env file relative to the current working directory
+dotenv_path = os.path.join(cwd, '.env')
+load_dotenv(dotenv_path)
+s3 = boto3.client('s3',
+                  aws_access_key_id=os.environ.get("AWS_PUBLIC_KEY"),
+                  aws_secret_access_key=os.environ.get("AWS_SECRET_KEY"),
+                  region_name='us-east-1')
 
 
 def favicon_checker(url: str) -> dict:
@@ -28,7 +41,13 @@ def favicon_checker(url: str) -> dict:
 
         features = extract_features_for_k_cluster(image_path)
         similar_favicon = find_similar_images(features)
-        print(similar_favicon)
+
+        # Upload the screenshot to S3
+        s3.upload_file(
+            Filename=image_path,
+            Bucket=os.environ.get('SCRAPED_FAVICON_BUCKET'),
+            Key=image_path,
+        )
     except (requests.exceptions.HTTPError, IOError) as e:
         print(e)
 
