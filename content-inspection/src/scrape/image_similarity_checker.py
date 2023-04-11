@@ -81,6 +81,6 @@ def find_similar_images(query_img_features, k=5):
     result = []
     for i in range(k):
         result.append({"name": names[indices[0][i]].split(
-            '.')[0], "distance": float(distances[0][i]),
+            '.')[0], "distance": float(distances[0][i]), 
             "url": os.environ.get('FAVICON_BUCKET_PREFIX')+names[indices[0][i]]})
     return result
