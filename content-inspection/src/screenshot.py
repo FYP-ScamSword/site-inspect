@@ -24,21 +24,14 @@ async def delete_file_from_local(filename: str) -> None:
 
 
 async def take_screenshot(url: str, background_tasks: BackgroundTasks) -> Dict[str, str]:
-    print(0)
     res = requests.get(url)
-    print(1)
     if res.status_code != 200:
         raise HTTPException(res.status_code, {"message": "Invalid URL"})
 
-    print(2)
-
     filename = urllib.parse.quote(url, safe='')+'.png'
-
-    print(3)
 
     # Check if the file already exists in the bucket
     try:
-        print(4)
         s3.head_object(Bucket="scamsword-screenshots", Key=filename)
         # If the file exists, return the URL to the file
         s3_url = f'https://scamsword-screenshots.s3.amazonaws.com/{filename}'
@@ -48,25 +41,20 @@ async def take_screenshot(url: str, background_tasks: BackgroundTasks) -> Dict[s
         # If the file doesn't exist, proceed with taking the screenshot and uploading it to S3
         print('Screenshot not found in S3, taking new screenshot...')
 
-    print(5)
-
     options = webdriver.ChromeOptions()
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
     # driver = webdriver.Remote(command_executor="http://chrome:4444/wd/hub")
     driver = webdriver.Chrome(options=options)
-    print(6)
 
     driver.get(url)
-    print(7)
 
     def size(name): return driver.execute_script(
         'return document.body.parentNode.scroll'+name)
     # May need manual adjustment
     driver.set_window_size(size('Width'), size('Height'))
     driver.save_screenshot(filename)
-    print(8)
 
     # Upload the screenshot to S3
     s3.upload_file(
@@ -74,10 +62,8 @@ async def take_screenshot(url: str, background_tasks: BackgroundTasks) -> Dict[s
         Bucket="scamsword-screenshots",
         Key=filename,
     )
-    print(9)
 
     # Schedule a background task to delete the file from local after it's uploaded to S3
     background_tasks.add_task(delete_file_from_local, filename)
-    print(10)
 
     return {"filename": filename}
